@@ -12,7 +12,8 @@ class OrderModel extends Model
     protected $returnType       = 'array';
     protected $allowedFields    = [
         'invoice_number', 'user_id', 'total', 'alamat', 'status',
-        'metode_pembayaran', 'nomor_resi', 'catatan', 'promo_id', 'discount_amount'
+        'metode_pembayaran', 'nomor_resi', 'catatan', 'promo_id', 'discount_amount',
+        'bukti_pembayaran'
     ];
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';

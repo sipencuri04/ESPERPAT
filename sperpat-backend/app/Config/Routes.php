@@ -116,6 +116,8 @@ $routes->group('api', function ($routes) {
         $routes->post('promos/validate', 'Api\PromoController::validatePromo');
         $routes->get('orders/user', 'Api\OrderController::userOrders');
         $routes->get('orders/(:num)', 'Api\OrderController::show/$1');
+        $routes->post('orders/(:num)/pay', 'Api\OrderController::pay/$1');
+        $routes->post('orders/(:num)/cancel', 'Api\OrderController::cancel/$1');
 
         // Admin/Superuser Protected Routes
         $routes->group('', ['filter' => 'role:admin,superuser'], function ($routes) {

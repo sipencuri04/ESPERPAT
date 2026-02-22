@@ -155,11 +155,83 @@
 
             <div class="modal-actions mt-4" v-if="selectedOrder.status === 'pending'">
                <button class="btn-cancel-order" @click="doCancel(selectedOrder.id)">Batalkan</button>
-               <button class="btn-pay-order" @click="doPay(selectedOrder.id)">Bayar Sekarang</button>
+               <button class="btn-pay-order" @click="openPayModal()">Bayar Sekarang</button>
             </div>
          </div>
          <div v-else class="text-center py-4 text-gray-500">
             Fetching order details...
+         </div>
+      </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div v-show="isPayModalOpen" class="modal-overlay" @click.self="closePayModal" style="z-index:2100;">
+      <div class="modal-card pay-modal-card">
+         <button class="btn-close-modal" @click="closePayModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+         </button>
+
+         <div class="modal-content-scroll">
+            <h3 class="modal-title">Pembayaran</h3>
+
+            <!-- Metode -->
+            <h4 class="section-sub">Pilih Metode Pembayaran</h4>
+            <div class="method-selector">
+               <div class="method-card" :class="{ selected: payMethod === 'qris' }" @click="payMethod = 'qris'">
+                  <div class="method-icon">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h3v3h-3z"></path><path d="M20 14v3h-3"></path><path d="M14 20h3"></path><path d="M20 20h0"></path></svg>
+                  </div>
+                  <span>QRIS</span>
+               </div>
+               <div class="method-card" :class="{ selected: payMethod === 'transfer' }" @click="payMethod = 'transfer'">
+                  <div class="method-icon">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                  </div>
+                  <span>Transfer</span>
+               </div>
+            </div>
+
+            <!-- QRIS Image -->
+            <div v-if="payMethod === 'qris'" class="qris-box">
+               <p class="qris-label">Scan QRIS di bawah ini:</p>
+               <div class="qris-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h3v3h-3z"></path><path d="M20 14v3h-3"></path><path d="M14 20h3"></path><path d="M20 20h0"></path></svg>
+                  <p style="font-size: 0.75rem; color: #94a3b8; margin-top:8px;">QRIS Toko ESPERPAT</p>
+               </div>
+            </div>
+
+            <!-- Transfer Info -->
+            <div v-if="payMethod === 'transfer'" class="transfer-box">
+               <p class="transfer-label">Transfer ke rekening berikut:</p>
+               <div class="bank-info">
+                  <div class="bank-row"><span class="b-label">Bank</span><span class="b-val">BCA</span></div>
+                  <div class="bank-row"><span class="b-label">No. Rek</span><span class="b-val">123 456 7890</span></div>
+                  <div class="bank-row"><span class="b-label">Atas Nama</span><span class="b-val">ESPERPAT STORE</span></div>
+                  <div class="bank-row"><span class="b-label">Jumlah</span><span class="b-val" style="color:#a855f7;font-weight:900;">{{ selectedOrder ? formatCurrency(selectedOrder.total) : '' }}</span></div>
+               </div>
+            </div>
+
+            <!-- Upload Bukti -->
+            <h4 class="section-sub" style="margin-top:20px;">Upload Bukti Pembayaran</h4>
+            <div class="upload-area" @click="$refs.fileInput.click()" @dragover.prevent @drop.prevent="onDrop">
+               <input type="file" ref="fileInput" accept="image/*" @change="onFileChange" style="display:none;" />
+               <div v-if="!previewUrl" class="upload-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <p>Ketuk untuk pilih foto<br/><span style="font-size:0.65rem;">atau seret file ke sini</span></p>
+               </div>
+               <div v-else class="preview-wrap">
+                  <img :src="previewUrl" class="preview-img" />
+                  <button class="btn-remove-img" @click.stop="removeImage">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+               </div>
+            </div>
+
+            <!-- Submit -->
+            <button class="btn-submit-pay" :disabled="!payFile || submitting" @click="submitPayment">
+               <span v-if="!submitting">Kirim Bukti Pembayaran</span>
+               <span v-else>Mengirim...</span>
+            </button>
          </div>
       </div>
     </div>
@@ -303,28 +375,81 @@ const closeModal = () => {
    selectedOrder.value = null;
 };
 
+// ---- Payment Modal ----
+const isPayModalOpen = ref(false);
+const payMethod = ref('qris');
+const payFile = ref(null);
+const previewUrl = ref(null);
+const submitting = ref(false);
+
+const openPayModal = () => {
+   payMethod.value = 'qris';
+   payFile.value = null;
+   previewUrl.value = null;
+   isPayModalOpen.value = true;
+};
+
+const closePayModal = () => {
+   isPayModalOpen.value = false;
+   payFile.value = null;
+   previewUrl.value = null;
+};
+
+const onFileChange = (e) => {
+   const f = e.target.files[0];
+   if (!f) return;
+   payFile.value = f;
+   previewUrl.value = URL.createObjectURL(f);
+};
+
+const onDrop = (e) => {
+   const f = e.dataTransfer.files[0];
+   if (!f) return;
+   payFile.value = f;
+   previewUrl.value = URL.createObjectURL(f);
+};
+
+const removeImage = () => {
+   payFile.value = null;
+   previewUrl.value = null;
+};
+
+const submitPayment = async () => {
+   if (!payFile.value || !selectedOrder.value) return;
+   submitting.value = true;
+   try {
+       const formData = new FormData();
+       formData.append('metode_pembayaran', payMethod.value);
+       formData.append('bukti_pembayaran', payFile.value);
+
+       const res = await client.post('orders/' + selectedOrder.value.id + '/pay', formData, {
+           headers: { 'Content-Type': 'multipart/form-data' }
+       });
+       if (res.data?.status) {
+           alert(res.data.message || 'Pembayaran berhasil dikirim!');
+           closePayModal();
+           closeModal();
+           fetchOrders();
+       } else {
+           alert(res.data?.message || 'Gagal mengirim bukti pembayaran.');
+       }
+   } catch (e) {
+       console.error(e);
+       alert(e.response?.data?.message || 'Gagal mengirim bukti pembayaran.');
+   } finally {
+       submitting.value = false;
+   }
+};
+
 const doCancel = async (id) => {
    if (!confirm("Yakin ingin membatalkan pesanan ini?")) return;
    try {
-       await client.post('orders/' + id + '/status', { status: 'cancelled' });
+       await client.post('orders/' + id + '/cancel');
        alert("Pesanan berhasil dibatalkan.");
        closeModal();
        fetchOrders();
    } catch (e) {
-       alert("Gagal membatalkan pesanan.");
-   }
-};
-
-const doPay = async (id) => {
-   // Simulasi fitur bayar, kita anggap paid
-   if (!confirm("Simulasi: Tandai Pesanan sebagai telah dibayar?")) return;
-   try {
-       await client.post('orders/' + id + '/status', { status: 'paid' });
-       alert("Simulasi pembayaran berhasil!");
-       closeModal();
-       fetchOrders();
-   } catch (e) {
-       alert("Gagal simulasi pembayaran.");
+       alert(e.response?.data?.message || "Gagal membatalkan pesanan.");
    }
 };
 </script>
@@ -690,5 +815,71 @@ const doPay = async (id) => {
   box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
 }
 .btn-pay-order:active { transform: scale(0.95); box-shadow: 0 5px 10px rgba(168, 85, 247, 0.3); }
+
+/* Payment Modal */
+.pay-modal-card { max-height: 90vh; }
+
+.method-selector {
+  display: flex; gap: 12px; margin-bottom: 20px;
+}
+
+.method-card {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 18px 10px; border-radius: 16px; border: 2px solid #e2e8f0;
+  background: #f8fafc; cursor: pointer; transition: all 0.25s; color: #64748b;
+}
+.method-card.selected {
+  border-color: #a855f7; background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+  color: #7c3aed; box-shadow: 0 4px 15px rgba(168,85,247,0.15);
+}
+.method-icon { width: 48px; height: 48px; border-radius: 50%; background: white;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.method-card.selected .method-icon { background: #ede9fe; }
+.method-card span { font-weight: 700; font-size: 0.85rem; }
+
+.qris-box, .transfer-box { margin-bottom: 10px; }
+.qris-label, .transfer-label { font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 10px; }
+.qris-placeholder {
+  background: #faf5ff; border: 2px dashed #d8b4fe; border-radius: 16px;
+  padding: 30px; text-align: center;
+}
+
+.bank-info {
+  background: #f8fafc; border-radius: 16px; padding: 15px;
+  display: flex; flex-direction: column; gap: 10px; border: 1px dashed #cbd5e1;
+}
+.bank-row { display: flex; justify-content: space-between; font-size: 0.85rem; }
+.bank-row .b-label { color: #64748b; font-weight: 500; }
+.bank-row .b-val { color: #1e293b; font-weight: 700; }
+
+.upload-area {
+  border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+  background: #f8fafc; margin-bottom: 20px; min-height: 120px;
+  display: flex; align-items: center; justify-content: center;
+}
+.upload-area:hover { border-color: #a855f7; background: #faf5ff; }
+.upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.upload-placeholder p { font-size: 0.8rem; color: #94a3b8; font-weight: 600; margin: 0; line-height: 1.4; }
+
+.preview-wrap { position: relative; width: 100%; }
+.preview-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 12px; }
+.btn-remove-img {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(239, 68, 68, 0.9); border: none; border-radius: 50%;
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn-submit-pay {
+  width: 100%; padding: 16px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  color: white; font-weight: 800; font-size: 1rem; cursor: pointer;
+  transition: all 0.2s; box-shadow: 0 10px 25px rgba(168,85,247,0.3);
+}
+.btn-submit-pay:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+.btn-submit-pay:not(:disabled):active { transform: scale(0.97); }
 
 </style>

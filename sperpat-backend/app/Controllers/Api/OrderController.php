@@ -214,4 +214,96 @@ class OrderController extends BaseApiController
 
         return $this->successResponse($order, 'Status pesanan berhasil diupdate.');
     }
+
+    public function cancel($id = null)
+    {
+        $userData = $this->getUserData();
+        $order = $this->orderModel->find($id);
+
+        if (!$order || (int)$order['user_id'] !== (int)$userData->id) {
+            return $this->errorResponse('Pesanan tidak ditemukan atau akses ditolak.', 404);
+        }
+
+        if ($order['status'] !== 'pending') {
+            return $this->errorResponse('Hanya pesanan pending yang dapat dibatalkan.');
+        }
+
+        $items = $this->orderItemModel->getByOrder($id);
+        $db = \Config\Database::connect();
+        
+        $db->transStart();
+        foreach ($items as $item) {
+            $qty = (int) $item['qty'];
+            $db->table('products')
+               ->where('id', $item['product_id'])
+               ->set('stok', "stok + {$qty}", false)
+               ->update();
+        }
+
+        if (!empty($order['promo_id'])) {
+            $db->table('promos')
+               ->where('id', $order['promo_id'])
+               ->where('claimed_count >', 0)
+               ->set('claimed_count', 'claimed_count - 1', false)
+               ->update();
+        }
+
+        $this->orderModel->update($id, ['status' => 'cancelled']);
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return $this->errorResponse('Gagal membatalkan pesanan.');
+        }
+
+        return $this->successResponse(null, 'Pesanan berhasil dibatalkan.');
+    }
+
+    public function pay($id = null)
+    {
+        $userData = $this->getUserData();
+        $order = $this->orderModel->find($id);
+
+        if (!$order || (int)$order['user_id'] !== (int)$userData->id) {
+            return $this->errorResponse('Pesanan tidak ditemukan atau akses ditolak.', 404);
+        }
+
+        if ($order['status'] !== 'pending') {
+            return $this->errorResponse('Pesanan sudah dibayar atau tidak bisa dibayar berjalan.');
+        }
+
+        $metode = $this->request->getPost('metode_pembayaran');
+        if (!in_array($metode, ['qris', 'transfer'])) {
+            return $this->errorResponse('Pilihan metode pembayaran (qris / transfer) tidak valid.', 400);
+        }
+
+        $file = $this->request->getFile('bukti_pembayaran');
+        $fileName = null;
+
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $validationRule = [
+                'bukti_pembayaran' => [
+                    'label' => 'Bukti Pembayaran',
+                    'rules' => 'uploaded[bukti_pembayaran]|is_image[bukti_pembayaran]|mime_in[bukti_pembayaran,image/jpg,image/jpeg,image/png,image/webp]|max_size[bukti_pembayaran,3072]',
+                ],
+            ];
+            if (!$this->validate($validationRule)) {
+                return $this->errorResponse($this->validator->getErrors()['bukti_pembayaran']);
+            }
+            $fileName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/payments', $fileName);
+        } else {
+            return $this->errorResponse('Bukti pembayaran wajib dilampirkan.', 400);
+        }
+
+        $updateData = [
+            'status'            => 'paid',
+            'metode_pembayaran' => $metode,
+            'bukti_pembayaran'  => 'uploads/payments/' . $fileName
+        ];
+
+        $this->orderModel->update($id, $updateData);
+        $order = $this->orderModel->find($id);
+
+        return $this->successResponse($order, 'Pembayaran berhasil dan sedang kami verifikasi.');
+    }
 }
