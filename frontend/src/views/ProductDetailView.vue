@@ -26,15 +26,6 @@
         </div>
       </section>
 
-      <!-- Thumbnails -->
-      <div class="thumbnails">
-        <div v-for="i in 3" :key="i" :class="['thumb-box', { active: i === 1 }]">
-          <div class="thumb-inner">
-             <img :src="baseUrl + product.image" v-if="product.image" />
-             <img src="https://placehold.co/100x100/f8fafc/999?text=View" v-else />
-          </div>
-        </div>
-      </div>
 
       <!-- General Info Card -->
       <div class="info-card">
