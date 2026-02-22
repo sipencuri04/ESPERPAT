@@ -85,7 +85,7 @@ const cartStore = useCartStore();
 
 const product = ref(null);
 const loading = ref(true);
-const baseUrl = 'http://localhost/ESPERPAT/backend/public/';
+const baseUrl = 'https://esperpat-api.atech.my.id/';
 
 const fetchProduct = async () => {
   try {

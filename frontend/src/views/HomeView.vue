@@ -101,7 +101,7 @@ const cartStore = useCartStore();
 const router = useRouter();
 const authStore = useAuthStore();
 const products = ref([]);
-const baseUrl = 'http://localhost/ESPERPAT/backend/public/';
+const baseUrl = 'https://esperpat-api.atech.my.id/';
 const user = ref({ name: 'User' });
 const searchQuery = ref('');
 

@@ -79,7 +79,7 @@ const cartStore = useCartStore();
 const products = ref([]);
 const loading = ref(true);
 const search = ref('');
-const baseUrl = 'http://localhost/ESPERPAT/backend/public/';
+const baseUrl = 'https://esperpat-api.atech.my.id/';
 
 // Pull to go back logic
 const startY = ref(0);

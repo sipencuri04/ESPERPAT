@@ -270,7 +270,7 @@ const categories = ref([]);
 const loading = ref(true);
 const submitting = ref(false);
 const searchQuery = ref('');
-const baseUrl = 'http://localhost/ESPERPAT/backend/public/';
+const baseUrl = 'https://esperpat-api.atech.my.id/';
 
 // State Management
 const isDetailOpen = ref(false);
