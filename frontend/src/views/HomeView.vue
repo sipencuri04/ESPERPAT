@@ -3,16 +3,27 @@
     <div class="container pb-20">
       
       <!-- Top Nav Header -->
-      <header class="home-header">
-        <h2 class="greeting">Halo, {{ user.name }}</h2>
+      <header class="home-header-pill">
+        <div class="user-greeting">
+          <div class="avatar-gradient">
+            {{ userInitials }}
+          </div>
+          <div class="greeting-text">
+            <h2>Halo, {{ user.name || 'Customer' }} <span class="wave">👋</span></h2>
+            <p>Selamat datang! Cari produk terbaru di sini</p>
+          </div>
+        </div>
+        
         <div class="header-actions">
-          <router-link to="/cart" class="icon-btn cart-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-            <span v-if="cartStore.items.length > 0" class="badge-dot">{{ cartStore.totalItems }}</span>
-          </router-link>
-          <router-link to="/profile">
-            <img :src="`https://ui-avatars.com/api/?name=${user.name}&background=cbd5e1&color=0f172a&size=100`" alt="Avatar" class="avatar-img" />
-          </router-link>
+           <div class="pill-actions">
+              <router-link to="/cart" class="cart-pill-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <span v-if="cartStore.items.length > 0" class="badge-dot">{{ cartStore.totalItems }}</span>
+              </router-link>
+              <router-link to="/profile" class="profile-pill-icon">
+                 {{ userInitials }}
+              </router-link>
+           </div>
         </div>
       </header>
 
@@ -91,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import client from '../api/client';
 import { useAuthStore } from '../stores/auth';
@@ -105,6 +116,11 @@ const products = ref([]);
 const baseUrl = 'https://esperpat-api.atech.my.id/';
 const user = ref({ name: 'User' });
 const searchQuery = ref('');
+
+const userInitials = computed(() => {
+  if (!user.value.name) return 'US';
+  return user.value.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+});
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
@@ -157,58 +173,121 @@ onMounted(() => {
   padding-bottom: 20px;
 }
 
-/* Header */
-.home-header {
+/* Header Pill Neumorphic */
+.home-header-pill {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  padding: 12px 14px 12px 12px;
+  background: white;
+  border-radius: 999px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.05); /* Soft elevated shadow */
+  margin: 1.5rem 1.25rem 1.5rem;
+  border: 1px solid rgba(255,255,255,0.8);
 }
 
-.greeting {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #111;
-  margin: 0;
-}
-
-.header-actions {
+.user-greeting {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.icon-btn.cart-btn {
-  position: relative;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
+.avatar-gradient {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #3b82f6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  box-shadow: 0 6px 15px rgba(168, 85, 247, 0.3);
+  flex-shrink: 0;
 }
 
-.icon-btn.cart-btn .badge-dot {
+.greeting-text h2 {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #1e293b;
+  margin: 0 0 2px 0;
+  display: flex;
+  align-items: center;
+  letter-spacing: -0.2px;
+}
+
+.greeting-text .wave {
+  font-size: 1rem;
+  margin-left: 6px;
+}
+
+.greeting-text p {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.pill-actions {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+  border: 1px solid #f1f5f9;
+  gap: 6px;
+}
+
+.cart-pill-icon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: #111;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.cart-pill-icon .badge-dot {
   position: absolute;
-  top: 0px;
-  right: 0px;
-  width: 16px;
-  height: 16px;
-  background: #ef4444;
+  top: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  background: #a855f7;
   color: white;
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 2px solid #f4f5f7;
+  border: 2px solid white;
 }
 
-.avatar-img {
-  width: 36px;
-  height: 36px;
+.profile-pill-icon {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  background: #e2e8f0;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-decoration: none;
 }
 
 /* Search */
