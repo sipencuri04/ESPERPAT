@@ -32,9 +32,13 @@ export const useCartStore = defineStore('cart', {
             this.save();
         },
         updateQty(id, qty) {
+            if (qty <= 0) {
+                this.removeItem(id);
+                return;
+            }
             const item = this.items.find(i => i.id === id);
             if (item) {
-                item.qty = Math.max(1, qty);
+                item.qty = qty;
                 this.save();
             }
         },

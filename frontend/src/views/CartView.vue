@@ -15,18 +15,21 @@
       <!-- Ship To -->
       <div class="ship-to animate-fade-up">
         <div class="user-info">
-          <img src="https://ui-avatars.com/api/?name=User&background=random" class="avatar" />
+          <div class="avatar-us">US</div>
           <div class="address">
-            <span>Ship to <strong>Customer</strong></span>
+            <span>Ship to Customer</span>
             <p>Tegalsari, Surabaya</p>
           </div>
-          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
       </div>
 
       <!-- Item List (Real Data) -->
       <div v-if="cartStore.items.length > 0" class="item-list">
         <div class="cart-item" v-for="(item, idx) in cartStore.items" :key="item.id">
+          <button class="delete-btn" @click="cartStore.removeItem(item.id)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
           <div class="item-content">
             <div class="img-box">
               <img :src="baseUrl + item.image" v-if="item.image" alt="Product" />
@@ -39,12 +42,12 @@
               
               <div class="row-actions">
                  <div class="qty-control">
-                   <button class="qty-btn" @click="cartStore.updateQty(item.id, item.qty - 1)">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                   <button class="qty-btn minus" @click="cartStore.updateQty(item.id, item.qty - 1)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                    </button>
                    <span class="qty">{{ item.qty }}</span>
                    <button class="qty-btn plus" @click="cartStore.updateQty(item.id, item.qty + 1)">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                    </button>
                  </div>
               </div>
@@ -62,24 +65,23 @@
 
       <!-- Coupon -->
       <div v-if="cartStore.items.length > 0" class="coupon-section animate-fade-up" style="animation-delay: 0.2s">
-        <p class="section-label">Punya Kupon Promo?</p>
-        
-        <div v-if="appliedPromo" class="coupon-box active">
-          <div class="code-info">
-             <span class="code">{{ appliedPromoCode }}</span>
-             <span class="status">Kupon Berhasil Diterapkan <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <div class="coupon-card">
+          <div v-if="appliedPromo" class="coupon-box active">
+            <div class="code-info">
+               <span class="code">{{ appliedPromoCode }}</span>
+               <span class="status">Kupon Berhasil Diterapkan <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+            </div>
+            <button @click="removePromo" class="remove-coupon-btn">✕</button>
           </div>
-          <button @click="removePromo" class="remove-coupon-btn">✕</button>
+          
+          <div v-else class="coupon-input-wrap">
+            <input v-model="promoInput" type="text" placeholder="Masukkan Kode Kupon" @keyup.enter="applyPromo" />
+            <button @click="applyPromo" :disabled="loadingPromo" class="apply-btn">
+              {{ loadingPromo ? 'Cek..' : 'Gunakan' }}
+            </button>
+          </div>
+          <p v-if="promoError" class="promo-error">{{ promoError }}</p>
         </div>
-        
-        <div v-else class="coupon-input-wrap">
-          <input v-model="promoInput" type="text" placeholder="Masukkan Kode Kupon" @keyup.enter="applyPromo" />
-          <button @click="applyPromo" :disabled="loadingPromo" class="apply-btn">
-            {{ loadingPromo ? 'Cek..' : 'Gunakan' }}
-          </button>
-        </div>
-        
-        <p v-if="promoError" class="promo-error">{{ promoError }}</p>
       </div>
 
       <!-- Summary -->
@@ -254,7 +256,7 @@ const finishCheckout = () => {
 <style scoped>
 .cart-view {
   min-height: 100vh;
-  background: #f4f5f7;
+  background: #f8fafc;
 }
 
 .cart-header {
@@ -264,7 +266,7 @@ const finishCheckout = () => {
   padding: 1.25rem 1.5rem;
   position: sticky;
   top: 0;
-  background: #f4f5f7;
+  background: #f8fafc;
   z-index: 10;
 }
 
@@ -302,19 +304,26 @@ const finishCheckout = () => {
   background: white;
   padding: 12px 16px;
   border-radius: 16px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  border: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.03);
 }
 
-.avatar {
-  width: 36px;
-  height: 36px;
+.avatar-us {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
+  background: #45322e;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
-.address { flex: 1; }
+.address { flex: 1; display: flex; flex-direction: column; }
 .address span { font-size: 0.8rem; color: #94a3b8; }
-.address p { font-size: 0.85rem; color: #111; font-weight: 700; margin-top: 1px; }
+.address p { font-size: 0.95rem; color: #111; font-weight: 700; margin-top: 2px; }
 
 /* Items */
 .item-list {
@@ -327,8 +336,24 @@ const finishCheckout = () => {
   background: white;
   border-radius: 20px;
   padding: 16px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+  position: relative;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
   border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 2;
 }
 
 .item-content {
@@ -339,8 +364,8 @@ const finishCheckout = () => {
 .img-box {
   width: 100px;
   height: 100px;
-  background: #e2e8f0;
-  border-radius: 20px;
+  background: #f1f5f9;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -358,12 +383,12 @@ const finishCheckout = () => {
   flex: 1; 
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 4px;
+  justify-content: center;
+  padding-right: 20px;
 }
-.info h4 { font-size: 0.95rem; line-height: 1.3; color: #111; font-weight: 800; margin-bottom: 4px; }
+.info h4 { font-size: 0.95rem; line-height: 1.3; color: #111; font-weight: 800; margin-bottom: 2px; }
 
-.brand-text { font-size: 0.8rem; color: #0ea5e9; font-weight: 600; margin-bottom: 4px; }
+.brand-text { font-size: 0.8rem; color: #3b82f6; font-weight: 600; margin-bottom: 6px; }
 
 .price-val { font-weight: 800; font-size: 1.05rem; color: #111; margin-bottom: 12px; }
 
@@ -377,27 +402,27 @@ const finishCheckout = () => {
   align-items: center;
   background: white;
   border-radius: 999px;
-  padding: 2px 6px;
+  padding: 4px;
   border: 1px solid #f1f5f9;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
   width: fit-content;
 }
 
 .qty-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: none;
-  background: transparent;
-  color: #111;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 
-.plus { background: #ff5e3a; color: white; }
-.qty { width: 30px; text-align: center; font-weight: 800; font-size: 0.95rem; color: #111;}
+.qty-btn.minus { background: white; color: #94a3b8; }
+.qty-btn.plus { background: #f97316; color: white; }
+
+.qty { width: 28px; text-align: center; font-weight: 800; font-size: 0.95rem; color: #111;}
 
 
 /* Empty State */
@@ -429,50 +454,54 @@ const finishCheckout = () => {
   margin-bottom: 30px;
 }
 
-.section-label { font-size: 0.85rem; color: #999; margin-bottom: 12px; font-weight: 700; }
+.coupon-card {
+  background: white;
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+}
 
 .coupon-input-wrap {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .coupon-input-wrap input {
   flex: 1;
-  border: 1px solid #f1f5f9;
-  border-radius: 14px;
+  border: none;
+  background: transparent;
   padding: 0 16px;
   font-family: inherit;
   font-size: 0.9rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 500;
   outline: none;
 }
+.coupon-input-wrap input::placeholder { color: #94a3b8; }
 
 .apply-btn {
-  background: #111;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 0 16px;
+  border-radius: 16px;
+  padding: 0 20px;
   font-weight: 700;
   cursor: pointer;
   height: 48px;
+  letter-spacing: 0.5px;
 }
 .apply-btn:disabled { opacity: 0.5; }
 
-.promo-error { color: #ef4444; font-size: 0.8rem; margin-top: 8px; font-weight: 600;}
+.promo-error { color: #ef4444; font-size: 0.8rem; margin: 8px 10px 0; font-weight: 600;}
 
 .coupon-box {
-  background: #fdfdfd;
+  background: #f0fdf4;
   border: 1px dashed #22c55e;
-  padding: 14px 20px;
+  padding: 12px 16px;
   border-radius: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
-.coupon-box.active { background: #f0fdf4; }
 
 .code-info { display: flex; flex-direction: column; }
 .coupon-box .code { font-weight: 800; font-size: 0.95rem; color: #111;}
@@ -491,27 +520,29 @@ const finishCheckout = () => {
 
 /* Summary */
 .summary-section {
-  padding: 0 1.5rem 100px;
+  padding: 0 1.5rem 120px;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   font-size: 0.95rem;
 }
 
-.summary-row span { color: #666; font-weight: 500; }
+.summary-row span { color: #475569; font-weight: 500; }
+.summary-row strong { color: #111; font-weight: 800; }
 .discount strong { color: #22c55e; }
 
 .divider {
   height: 1px;
-  border-top: 1px dashed #eee;
+  background: #f1f5f9;
   margin: 16px 0;
 }
 
-.total { font-size: 1.1rem; }
-.total strong { font-size: 1.25rem; font-weight: 800; color: #000; }
+.total { font-size: 1.1rem; align-items: center; }
+.total span { font-weight: 800; color: #111;}
+.total strong { font-size: 1.25rem; font-weight: 800; color: #111; }
 
 /* Footer */
 .cart-footer {
@@ -521,27 +552,27 @@ const finishCheckout = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  padding: 20px 1.5rem 40px;
-  background: white;
+  padding: 15px 1.5rem 30px;
+  background: transparent;
   z-index: 100;
 }
 
 .checkout-btn {
   width: 100%;
-  height: 58px;
-  background: linear-gradient(90deg, #6366f1, #a855f7);
+  height: 60px;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
   color: white;
   border: none;
-  border-radius: 18px;
-  font-weight: 900;
-  font-size: 1rem;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 1.05rem;
   cursor: pointer;
-  letter-spacing: 1px;
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25);
+  letter-spacing: 0.5px;
+  box-shadow: 0 12px 30px rgba(139, 92, 246, 0.3);
 }
 
 .checkout-btn:disabled {
-  background: #ccc;
+  background: #cbd5e1;
   box-shadow: none;
   cursor: not-allowed;
 }
