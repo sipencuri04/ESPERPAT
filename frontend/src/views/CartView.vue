@@ -236,7 +236,7 @@ const confirmOrder = async () => {
         await client.post('orders', orderData);
         
         // Success
-        cartStore.items = []; // Clear cart locally
+        cartStore.clearCart(); // Clear cart globally including storage
         isSuccessOpen.value = true;
     } catch (err) {
         alert(err.response?.data?.message || 'Gagal membuat pesanan');

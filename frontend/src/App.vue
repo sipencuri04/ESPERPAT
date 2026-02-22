@@ -5,12 +5,6 @@ import { useCartStore } from './stores/cart';
 
 const route = useRoute();
 const cartStore = useCartStore();
-const isNavHidden = computed(() => {
-  const hiddenNames = ['login', 'register', 'product-detail', 'cart', 'profile', 'home', 'products'];
-  return hiddenNames.includes(route.name) || 
-         String(route.name).startsWith('admin-') || 
-         String(route.name).startsWith('superuser-');
-});
 
 const showBottomNav = computed(() => {
   const hiddenNames = ['login', 'register', 'product-detail', 'cart', 'profile', 'my-profile', 'customer-orders'];
@@ -40,15 +34,7 @@ const showBottomNav = computed(() => {
       </RouterView>
     </main>
 
-    <!-- Global Floating Cart Button -->
-    <transition name="fade-up">
-      <router-link v-if="cartStore.items.length > 0 && !isNavHidden" to="/cart" class="floating-cart">
-        <div class="cart-icon-wrap">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-          <span class="cart-badge">{{ cartStore.totalItems }}</span>
-        </div>
-      </router-link>
-    </transition>
+
     <!-- Bottom Mobile Navigation -->
     <div v-if="showBottomNav" class="bottom-dock">
       <router-link to="/" class="dock-item" :class="{ 'router-link-active': route.name === 'home' }">
