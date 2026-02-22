@@ -6,6 +6,10 @@
       <header class="home-header">
         <h2 class="greeting">Halo, {{ user.name }}</h2>
         <div class="header-actions">
+          <router-link to="/cart" class="icon-btn cart-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span v-if="cartStore.items.length > 0" class="badge-dot">{{ cartStore.totalItems }}</span>
+          </router-link>
           <router-link to="/profile">
             <img :src="`https://ui-avatars.com/api/?name=${user.name}&background=cbd5e1&color=0f172a&size=100`" alt="Avatar" class="avatar-img" />
           </router-link>
