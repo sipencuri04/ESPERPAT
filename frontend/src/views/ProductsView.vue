@@ -26,10 +26,16 @@
       <span class="pill">Tools</span>
     </div>
 
-    <!-- Search in Page -->
-    <div class="search-input-wrap">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input v-model="search" type="text" placeholder="Search products..." @input="fetchProducts" />
+    <!-- Search and Cart in Page -->
+    <div class="search-action-row">
+      <div class="search-input-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input v-model="search" type="text" placeholder="Search products..." @input="fetchProducts" />
+      </div>
+      <router-link to="/cart" class="cart-btn-square">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <span v-if="cartStore.items.length > 0" class="badge-dot">{{ cartStore.totalItems }}</span>
+      </router-link>
     </div>
 
     <!-- Loader -->
@@ -272,8 +278,14 @@ onMounted(() => {
   box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
 }
 
-.search-input-wrap {
+.search-action-row {
+  display: flex;
+  gap: 12px;
   margin: 0 16px 24px;
+}
+
+.search-input-wrap {
+  flex: 1;
   background: white;
   display: flex;
   align-items: center;
@@ -282,14 +294,53 @@ onMounted(() => {
   height: 56px;
   border: 1px solid #f1f5f9;
   box-shadow: 0 8px 30px rgba(0,0,0,0.03);
-  box-sizing: border-box; /* Crucial for margin-based width */
+  box-sizing: border-box;
+}
+
+.cart-btn-square {
+  width: 56px;
+  height: 56px;
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.03);
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.cart-btn-square:active { transform: scale(0.95); }
+
+.cart-btn-square .badge-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid white;
 }
 
 @media (max-width: 400px) {
-  .search-input-wrap {
+  .search-action-row {
     margin: 0 12px 20px;
+    gap: 10px;
+  }
+  .search-input-wrap, .cart-btn-square {
     height: 52px;
-    padding: 0 16px;
+  }
+  .cart-btn-square {
+    width: 52px;
   }
 }
 

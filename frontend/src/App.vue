@@ -6,7 +6,7 @@ import { useCartStore } from './stores/cart';
 const route = useRoute();
 const cartStore = useCartStore();
 const isNavHidden = computed(() => {
-  const hiddenNames = ['login', 'register', 'product-detail', 'cart', 'profile', 'home'];
+  const hiddenNames = ['login', 'register', 'product-detail', 'cart', 'profile', 'home', 'products'];
   return hiddenNames.includes(route.name) || 
          String(route.name).startsWith('admin-') || 
          String(route.name).startsWith('superuser-');
