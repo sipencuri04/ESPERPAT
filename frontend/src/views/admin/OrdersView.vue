@@ -120,20 +120,54 @@
 
             <!-- Action Buttons based on status -->
             <div class="drawer-actions">
-              <button v-if="selectedOrder.status === 'pending'" class="btn-primary" @click="updateStatus('paid')">
-                Konfirmasi Pembayaran
-              </button>
+
+              <!-- PAID: Show bukti pembayaran & Approve/Reject -->
+              <div v-if="selectedOrder.status === 'paid'" class="verification-section">
+                <h5 class="section-lbl" style="margin-bottom:10px;">Bukti Pembayaran</h5>
+                <div class="proof-box" v-if="selectedOrder.bukti_pembayaran">
+                   <img :src="apiBase + selectedOrder.bukti_pembayaran" class="proof-img" @click="openProofFull" />
+                   <div class="proof-meta">
+                      <span class="pm-method">Metode: <strong>{{ (selectedOrder.metode_pembayaran || '-').toUpperCase() }}</strong></span>
+                      <span class="pm-total">Tagihan: <strong>{{ formatCurrency(selectedOrder.total) }}</strong></span>
+                   </div>
+                </div>
+                <div v-else class="no-proof">
+                   <p>Pelanggan belum mengunggah bukti pembayaran.</p>
+                </div>
+
+                <div class="verify-actions">
+                   <button class="btn-approve" @click="approvePayment">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      Approve
+                   </button>
+                   <button class="btn-reject" @click="rejectPayment">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      Reject
+                   </button>
+                </div>
+              </div>
+
+              <!-- PENDING: Waiting customer to pay -->
+              <div v-if="selectedOrder.status === 'pending'" class="pending-notice">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                 <span>Menunggu pelanggan upload bukti bayar...</span>
+              </div>
               
-              <div v-if="selectedOrder.status === 'paid'" class="ship-action">
-                <input v-model="resiInput" type="text" placeholder="Masukkan Nomor Resi..." class="resi-input" />
-                <button class="btn-primary" @click="updateStatus('shipped')" :disabled="!resiInput">
-                  Kirim Barang
+              <!-- SHIPPED: already approved, shipped -->
+              <div v-if="selectedOrder.status === 'shipped'" class="ship-action">
+                <button class="btn-outline" @click="updateStatus('completed')">
+                  Selesaikan Pesanan
                 </button>
               </div>
 
-              <button v-if="selectedOrder.status === 'shipped'" class="btn-outline" @click="updateStatus('completed')">
-                Selesaikan Pesanan
-              </button>
+              <!-- Input resi for approved orders -->
+              <div v-if="selectedOrder.status === 'paid' || selectedOrder.status === 'shipped'" class="ship-action" style="margin-top:10px;">
+                <h5 class="section-lbl">Nomor Resi Pengiriman</h5>
+                <input v-model="resiInput" type="text" placeholder="Masukkan Nomor Resi..." class="resi-input" />
+                <button v-if="selectedOrder.status !== 'shipped'" class="btn-primary" @click="updateStatus('shipped')" :disabled="!resiInput">
+                  Approve & Kirim Barang
+                </button>
+              </div>
 
               <button v-if="['pending', 'paid'].includes(selectedOrder.status)" class="btn-danger" @click="updateStatus('cancelled')">
                 Batalkan & Restok
@@ -156,6 +190,7 @@ const currentTab = ref('pending');
 const isDetailOpen = ref(false);
 const selectedOrder = ref(null);
 const resiInput = ref('');
+const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace('/api/', '/');
 
 const tabs = [
   { label: 'Pending', value: 'pending' },
@@ -219,6 +254,38 @@ const updateStatus = async (newStatus) => {
 };
 
 const closeDetail = () => { isDetailOpen.value = false; };
+
+const approvePayment = async () => {
+   if (!confirm('Bukti pembayaran valid. Setujui pesanan ini?')) return;
+   try {
+       // Keep as paid (approved), admin can then ship
+       await client.put(`orders/${selectedOrder.value.id}/status`, { status: 'paid' });
+       alert('Pembayaran disetujui! Silakan masukkan resi untuk kirim barang.');
+       // Reload detail
+       const res = await client.get(`orders/${selectedOrder.value.id}`);
+       selectedOrder.value = res.data.data;
+   } catch (err) {
+       alert(err.response?.data?.message || 'Gagal approve.');
+   }
+};
+
+const rejectPayment = async () => {
+   if (!confirm('Tolak bukti pembayaran ini? Pesanan akan kembali ke Pending.')) return;
+   try {
+       await client.put(`orders/${selectedOrder.value.id}/status`, { status: 'pending' });
+       alert('Bukti pembayaran ditolak. Pelanggan harus upload ulang.');
+       isDetailOpen.value = false;
+       fetchOrders();
+   } catch (err) {
+       alert(err.response?.data?.message || 'Gagal reject.');
+   }
+};
+
+const openProofFull = () => {
+   if (selectedOrder.value?.bukti_pembayaran) {
+      window.open(apiBase + selectedOrder.value.bukti_pembayaran, '_blank');
+   }
+};
 
 const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
 
@@ -320,4 +387,56 @@ onMounted(fetchOrders);
 
 .slide-up-enter-active, .slide-up-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 .slide-up-enter-from, .slide-up-leave-to { transform: translateY(100%); }
+
+/* Verification Section */
+.verification-section { margin-bottom: 15px; }
+
+.proof-box {
+  background: #f8fafc; border-radius: 18px; overflow: hidden;
+  border: 1px solid #e2e8f0; margin-bottom: 15px;
+}
+.proof-img {
+  width: 100%; max-height: 250px; object-fit: contain; cursor: pointer;
+  background: #f1f5f9; display: block;
+}
+.proof-meta {
+  padding: 12px 15px; display: flex; justify-content: space-between; font-size: 0.8rem;
+}
+.pm-method { color: #64748b; }
+.pm-method strong { color: #7c3aed; }
+.pm-total { color: #64748b; }
+.pm-total strong { color: #0f172a; }
+
+.no-proof {
+  background: #fff7ed; border: 1px dashed #fed7aa; border-radius: 14px;
+  padding: 20px; text-align: center; font-size: 0.8rem; color: #f97316; font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.verify-actions {
+  display: flex; gap: 10px; margin-bottom: 10px;
+}
+.btn-approve {
+  flex: 1; height: 52px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white; font-weight: 800; font-size: 0.9rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(16,185,129,0.3); transition: all 0.2s;
+}
+.btn-approve:active { transform: scale(0.96); }
+
+.btn-reject {
+  flex: 1; height: 52px; border-radius: 16px; border: 2px solid #fecaca;
+  background: #fff1f2; color: #ef4444; font-weight: 800; font-size: 0.9rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+}
+.btn-reject:active { transform: scale(0.96); background: #fee2e2; }
+
+.pending-notice {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff7ed; border: 1px solid #ffedd5; border-radius: 16px;
+  padding: 15px 18px; font-size: 0.8rem; font-weight: 700; color: #ea580c;
+  margin-bottom: 10px;
+}
 </style>
