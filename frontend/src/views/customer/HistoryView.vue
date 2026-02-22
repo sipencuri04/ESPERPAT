@@ -199,12 +199,12 @@ const getStatusText = (status) => {
   font-family: 'Inter', sans-serif;
 }
 
-/* Deep Green Header Background */
+/* Deep Purple Gradient Header Background */
 .header-bg {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 220px;
-  background: #096851; /* Match mockup teal green */
+  background: linear-gradient(135deg, #a855f7, #6366f1);
   z-index: 0;
 }
 
