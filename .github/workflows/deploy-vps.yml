@@ -24,8 +24,8 @@ jobs:
           # Atau gunakan key jika pakai SSH key instead of password:
           # key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Arahkan ke folder project di VPS (Sesuaikan path ini)
-            cd /var/www/sperpat-backend
+            # Arahkan ke folder project di VPS
+            cd /var/www/ESPERPAT/sperpat-backend
             
             # Ambil update terbaru dari git
             git pull origin main
