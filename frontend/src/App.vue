@@ -13,7 +13,7 @@ const isNavHidden = computed(() => {
 });
 
 const showBottomNav = computed(() => {
-  const hiddenNames = ['login', 'register'];
+  const hiddenNames = ['login', 'register', 'product-detail', 'cart'];
   if (hiddenNames.includes(route.name)) return false;
   if (String(route.name).startsWith('admin-') || String(route.name).startsWith('superuser-')) return false;
   return true;
