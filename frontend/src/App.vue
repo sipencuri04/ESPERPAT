@@ -58,7 +58,7 @@ const showBottomNav = computed(() => {
 .app-container {
   max-width: 480px;
   margin: 0 auto;
-  background: #f4f5f7;
+  background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 30%, #fae8ff 70%, #e0f2fe 100%);
   min-height: 100vh;
   position: relative;
   box-shadow: 0 0 50px rgba(0,0,0,0.05);
@@ -112,14 +112,16 @@ const showBottomNav = computed(() => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  background: white;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   height: 75px;
   display: flex;
   justify-content: space-evenly;
   align-items: center;
   padding: 0;
   z-index: 1000;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   box-shadow: 0 -10px 40px rgba(0,0,0,0.03);

@@ -256,7 +256,7 @@ const finishCheckout = () => {
 <style scoped>
 .cart-view {
   min-height: 100vh;
-  background: #f8fafc;
+  background: transparent;
 }
 
 .cart-header {
@@ -266,8 +266,8 @@ const finishCheckout = () => {
   padding: 1.25rem 1.5rem;
   position: sticky;
   top: 0;
-  background: #f8fafc;
-  z-index: 10;
+  background: transparent;
+  z-index: 100;
 }
 
 .cart-header .title {

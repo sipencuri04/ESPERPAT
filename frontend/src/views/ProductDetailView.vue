@@ -113,7 +113,7 @@ onMounted(fetchProduct);
 <style scoped>
 .product-detail {
   min-height: 100vh;
-  background: #f8fafc;
+  background: transparent;
 }
 
 .top-bar {
@@ -159,7 +159,7 @@ onMounted(fetchProduct);
 }
 
 .main-image-bg {
-  background: #f1f5f9;
+  background: white;
   border-radius: 35px;
   height: 380px;
   display: flex;
@@ -168,7 +168,7 @@ onMounted(fetchProduct);
   position: relative;
   overflow: hidden;
   border: none;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); /* matching soft inward / flat look */
+  box-shadow: 0 10px 35px rgba(0,0,0,0.04);
 }
 
 .main-img {

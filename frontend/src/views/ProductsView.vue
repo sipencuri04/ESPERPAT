@@ -111,7 +111,8 @@ onMounted(() => {
 <style scoped>
 .products-view {
   min-height: 100vh;
-  background: #f4f5f7;
+  background: transparent;
+  padding-bottom: 90px;
   overflow-x: hidden;
   position: relative;
   width: 100%;
