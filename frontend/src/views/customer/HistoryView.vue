@@ -41,7 +41,7 @@
 
         <div v-else class="orders-wrap">
           <!-- Order Card matching mockup -->
-          <div class="order-card" v-for="order in filteredOrders" :key="order.id">
+          <div class="order-card" v-for="order in filteredOrders" :key="order.id" @click="openOrderDetail(order.id)">
             
             <!-- Left colored bar -->
             <div class="status-bar" :style="{ background: getStatusColorHex(order.status) }"></div>
@@ -51,7 +51,7 @@
                 <!-- Order ID Text -->
                 <div class="invoice-box">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                  <span class="invoice-text">{{ order.invoice || 'ORD-' + order.id }}</span>
+                  <span class="invoice-text">{{ order.invoice_number || 'INV-' + order.id }}</span>
                 </div>
                 
                 <!-- Circular Progress SVG -->
@@ -69,12 +69,12 @@
               <!-- Time -->
               <div class="time-row">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>{{ order.created_at || 'Just now' }}</span>
+                <span>{{ order.created_at }}</span>
               </div>
 
               <!-- Title (Replaced Task Title with Order context) -->
               <div class="order-title">
-                {{ formatCurrency(order.total_harga || order.amount || 0) }} - {{ order.items ? order.items.length + ' Items' : 'Purchase' }}
+                {{ formatCurrency(order.total || 0) }}
               </div>
 
               <!-- Footer with Avatar and Badge -->
@@ -98,6 +98,72 @@
         </div>
       </section>
 
+    <!-- Modal Overlay -->
+    <div v-show="isModalOpen" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-card">
+         <button class="btn-close-modal" @click="closeModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+         </button>
+         
+         <div v-if="selectedOrder" class="modal-content-scroll">
+            <h3 class="modal-title">Detail Pesanan</h3>
+            
+            <div class="info-group">
+               <div class="info-row">
+                  <span class="i-label">Invoice:</span>
+                  <span class="i-val">{{ selectedOrder.invoice_number }}</span>
+               </div>
+               <div class="info-row">
+                  <span class="i-label">Status:</span>
+                  <span class="i-val" :style="{ color: getStatusColorHex(selectedOrder.status), fontWeight: 'bold' }">{{ getStatusText(selectedOrder.status) }}</span>
+               </div>
+               <div class="info-row" v-if="selectedOrder.nomor_resi">
+                  <span class="i-label">Resi:</span>
+                  <span class="i-val" style="color:#a855f7;">{{ selectedOrder.nomor_resi }}</span>
+               </div>
+               <div class="info-row">
+                  <span class="i-label">Tanggal:</span>
+                  <span class="i-val">{{ selectedOrder.created_at }}</span>
+               </div>
+            </div>
+
+            <div class="countdown-warning" v-if="selectedOrder.status === 'pending'">
+               <div class="cw-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+               </div>
+               <div class="cw-text">
+                  <p>Selesaikan pembayaran sebelum:</p>
+                  <h4>{{ countdownText(selectedOrder.created_at) }}</h4>
+               </div>
+            </div>
+
+            <div class="items-list">
+               <h4 class="section-sub">Daftar Barang</h4>
+               <div class="item-line" v-for="item in selectedOrder.items" :key="item.id">
+                  <div class="item-line-txt">
+                     <span>{{ item.qty }}x Produk (ID:{{ item.product_id }})</span>
+                     <span class="sub-muted">@ {{ formatCurrency(item.harga) }}</span>
+                  </div>
+                  <span class="item-line-sub">{{ formatCurrency(item.subtotal) }}</span>
+               </div>
+            </div>
+
+            <div class="total-bar">
+               <span>Total:</span>
+               <span class="t-amount">{{ formatCurrency(selectedOrder.total) }}</span>
+            </div>
+
+            <div class="modal-actions mt-4" v-if="selectedOrder.status === 'pending'">
+               <button class="btn-cancel-order" @click="doCancel(selectedOrder.id)">Batalkan</button>
+               <button class="btn-pay-order" @click="doPay(selectedOrder.id)">Bayar Sekarang</button>
+            </div>
+         </div>
+         <div v-else class="text-center py-4 text-gray-500">
+            Fetching order details...
+         </div>
+      </div>
+    </div>
+
     </div>
   </div>
 </template>
@@ -120,9 +186,14 @@ const user = ref({
 const orders = ref([]);
 const loading = ref(true);
 const activeTab = ref('all');
+const isModalOpen = ref(false);
+const selectedOrder = ref(null);
+const currentTime = ref(Date.now());
+let timerInterval = null;
 
 // "New" = Pending, "Process" = Ongoing, "Sent" = Completed
 onMounted(async () => {
+  timerInterval = setInterval(() => { currentTime.value = Date.now(); }, 1000);
   if (!authStore.isAuthenticated) {
     router.push('/login');
     return;
@@ -185,9 +256,76 @@ const getProgressValue = (status) => {
 };
 
 const getStatusText = (status) => {
-  if (status === 'Sent') return 'COMPLETED';
-  if (status === 'Process') return 'IN PROGRESS';
+  if (status === 'Sent' || status === 'completed') return 'COMPLETED';
+  if (status === 'Process' || status === 'paid' || status === 'shipped') return 'IN PROGRESS';
+  if (status === 'cancelled') return 'CANCELLED';
   return 'PENDING';
+};
+
+import { onUnmounted } from 'vue';
+
+onUnmounted(() => {
+   if (timerInterval) clearInterval(timerInterval);
+});
+
+const countdownText = (createdAt) => {
+    if (!createdAt) return '00:00:00';
+    const start = new Date(createdAt.replace(' ', 'T')).getTime();
+    if(isNaN(start)) return '00:00:00';
+    const expertion = start + (24 * 60 * 60 * 1000);
+    const diff = expertion - currentTime.value;
+    if (diff <= 0) return 'Kedaluwarsa';
+    
+    let h = Math.floor(diff / (1000 * 60 * 60));
+    let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    let s = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+};
+
+const openOrderDetail = async (id) => {
+   selectedOrder.value = null;
+   isModalOpen.value = true;
+   try {
+       const res = await client.get('orders/' + id);
+       if (res.data?.success) {
+           selectedOrder.value = res.data.data;
+       }
+   } catch(e) {
+       console.error("Gagal load detail", e);
+       alert("Gagal memuat detail pesanan.");
+       isModalOpen.value = false;
+   }
+};
+
+const closeModal = () => {
+   isModalOpen.value = false;
+   selectedOrder.value = null;
+};
+
+const doCancel = async (id) => {
+   if (!confirm("Yakin ingin membatalkan pesanan ini?")) return;
+   try {
+       await client.post('orders/' + id + '/status', { status: 'cancelled' });
+       alert("Pesanan berhasil dibatalkan.");
+       closeModal();
+       fetchOrders();
+   } catch (e) {
+       alert("Gagal membatalkan pesanan.");
+   }
+};
+
+const doPay = async (id) => {
+   // Simulasi fitur bayar, kita anggap paid
+   if (!confirm("Simulasi: Tandai Pesanan sebagai telah dibayar?")) return;
+   try {
+       await client.post('orders/' + id + '/status', { status: 'paid' });
+       alert("Simulasi pembayaran berhasil!");
+       closeModal();
+       fetchOrders();
+   } catch (e) {
+       alert("Gagal simulasi pembayaran.");
+   }
 };
 </script>
 
@@ -415,5 +553,142 @@ const getStatusText = (status) => {
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
+
+/* Modal Styes */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end; /* Slide up from bottom naturally */
+  justify-content: center;
+}
+
+.modal-card {
+  background: white;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  padding: 25px 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-close-modal {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.modal-content-scroll {
+  overflow-y: auto;
+  padding-right: 5px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.info-group {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 15px;
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 20px;
+  border: 1px dashed #cbd5e1;
+}
+
+.info-row {
+  display: flex; justify-content: space-between; font-size: 0.85rem;
+}
+
+.info-row .i-label { color: #64748b; font-weight: 500; }
+.info-row .i-val { color: #1e293b; font-weight: 700; }
+
+.countdown-warning {
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+  border: 1px solid #fecdd3;
+  border-radius: 16px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  color: #e11d48;
+}
+
+.cw-icon {
+  background: white;
+  min-width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.1);
+}
+
+.cw-text p { margin: 0; font-size: 0.75rem; font-weight: 600; color: #f43f5e; }
+.cw-text h4 { margin: 2px 0 0; font-size: 1.2rem; font-weight: 900; letter-spacing: 1px; }
+
+.section-sub {
+  font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 10px;
+}
+
+.items-list {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.item-line {
+  display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 10px;
+  padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;
+}
+.item-line:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.item-line-txt { display: flex; flex-direction: column; color: #334155; font-weight: 600; }
+.item-line-txt .sub-muted { color: #94a3b8; font-size: 0.7rem; font-weight: 500; }
+.item-line-sub { font-weight: 800; color: #0f172a; }
+
+.total-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #1e293b; color: white; padding: 15px 20px; border-radius: 16px;
+  font-weight: 700; font-size: 1rem;
+}
+
+.total-bar .t-amount { font-size: 1.15rem; font-weight: 900; color: #a855f7; text-shadow: 0 2px 10px rgba(168,85,247,0.4); }
+
+.modal-actions {
+  display: flex; gap: 10px; margin-top: 20px; padding-bottom: 10px;
+}
+
+.btn-cancel-order {
+  flex: 1; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; background: white;
+  color: #64748b; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+}
+.btn-cancel-order:active { transform: scale(0.95); background: #f8fafc; }
+
+.btn-pay-order {
+  flex: 2; padding: 15px; border-radius: 14px; border: none; 
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  color: white; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+}
+.btn-pay-order:active { transform: scale(0.95); box-shadow: 0 5px 10px rgba(168, 85, 247, 0.3); }
 
 </style>
