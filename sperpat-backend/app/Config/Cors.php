@@ -37,21 +37,12 @@ class Cors extends BaseConfig
          *   - ['http://localhost:8080']
          *   - ['https://www.example.com']
          */
-        'allowedOrigins' => [
-            'https://esperpat.vercel.app',
-            'http://localhost:5173',
-            'http://localhost:3000',
-            'http://localhost',
-        ],
+        'allowedOrigins' => ['*'],
 
         /**
          * Origin regex patterns for the `Access-Control-Allow-Origin` header.
-         * Allows all vercel.app previews and trycloudflare.com tunnels.
          */
-        'allowedOriginsPatterns' => [
-            'https://[\w-]+\.vercel\.app',
-            'https://[\w-]+\.trycloudflare\.com',
-        ],
+        'allowedOriginsPatterns' => [],
 
         /**
          * Weather to send the `Access-Control-Allow-Credentials` header.
