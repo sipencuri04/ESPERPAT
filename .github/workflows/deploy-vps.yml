@@ -30,11 +30,12 @@ jobs:
             # Ambil update terbaru dari git
             git pull origin main
             
-            # (Opsional) Install dependency composer jika ada update
-            # composer install --no-dev --optimize-autoloader
+            # Install dependency composer (Gunakan php8.2)
+            export COMPOSER_ALLOW_SUPERUSER=1
+            php8.2 /usr/local/bin/composer install --no-dev --optimize-autoloader
             
-            # (Opsional) Jalankan migrasi database jika ada
-            # php spark migrate
+            # Jalankan migrasi database jika ada
+            php8.2 spark migrate
             
             # Sesuaikan permission jika dibutuhkan
             chown -R www-data:www-data writable
