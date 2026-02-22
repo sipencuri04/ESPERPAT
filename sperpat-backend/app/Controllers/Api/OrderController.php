@@ -66,7 +66,15 @@ class OrderController extends BaseApiController
         $orderItems = [];
 
         foreach ($data['items'] as $item) {
-            $product = $this->productModel->find($item['product_id']);
+            if (!isset($item['qty']) || !is_numeric($item['qty']) || $item['qty'] <= 0) {
+                $db->transRollback();
+                return $this->errorResponse("Kuantitas barang (qty) tidak valid. Harus lebih dari 0.", 400);
+            }
+
+            // Mengunci baris produk ini agar request lain mengantre (Pessimistic Locking) mencegah stok minus
+            $productQuery = $db->table('products')->where('id', $item['product_id'])->getForUpdate();
+            $product = $productQuery ? $productQuery->getRowArray() : null;
+
             if (!$product) {
                 $db->transRollback();
                 return $this->errorResponse("Produk ID {$item['product_id']} tidak ditemukan.", 404);
@@ -179,25 +187,25 @@ class OrderController extends BaseApiController
             $updateData['nomor_resi'] = $data['nomor_resi'];
         }
 
-        // If cancelled, restore stock AND restore promo quota
+        // If cancelled, restore stock AND restore promo quota securely
         if ($data['status'] === 'cancelled' && $order['status'] !== 'cancelled') {
             $items = $this->orderItemModel->getByOrder($id);
             foreach ($items as $item) {
-                $product = $this->productModel->find($item['product_id']);
-                if ($product) {
-                    $this->productModel->update($item['product_id'], [
-                        'stok' => $product['stok'] + $item['qty'],
-                    ]);
-                }
+                $qty = (int) $item['qty'];
+                $db = \Config\Database::connect();
+                $db->table('products')
+                   ->where('id', $item['product_id'])
+                   ->set('stok', "stok + {$qty}", false)
+                   ->update();
             }
 
             if (!empty($order['promo_id'])) {
-                $promo = $this->promoModel->find($order['promo_id']);
-                if ($promo && $promo['claimed_count'] > 0) {
-                    $this->promoModel->update($promo['id'], [
-                        'claimed_count' => $promo['claimed_count'] - 1
-                    ]);
-                }
+                $db = \Config\Database::connect();
+                $db->table('promos')
+                   ->where('id', $order['promo_id'])
+                   ->where('claimed_count >', 0)
+                   ->set('claimed_count', 'claimed_count - 1', false)
+                   ->update();
             }
         }
 
