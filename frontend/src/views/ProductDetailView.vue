@@ -159,7 +159,7 @@ onMounted(fetchProduct);
 }
 
 .main-image-bg {
-  background: white;
+  background: #f1f5f9;
   border-radius: 35px;
   height: 380px;
   display: flex;
@@ -168,7 +168,7 @@ onMounted(fetchProduct);
   position: relative;
   overflow: hidden;
   border: none;
-  box-shadow: 0 10px 35px rgba(0,0,0,0.03);
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); /* matching soft inward / flat look */
 }
 
 .main-img {
