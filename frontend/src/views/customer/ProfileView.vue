@@ -212,7 +212,7 @@ onMounted(async () => {
 
   // Fetch true order status for stats
   try {
-    const res = await client.get('orders'); 
+    const res = await client.get('orders/user'); 
     if (res.data?.data) {
        const orders = res.data.data;
        ordersTotal.value = orders.length;

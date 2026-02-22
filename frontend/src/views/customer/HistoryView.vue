@@ -211,7 +211,7 @@ onMounted(async () => {
 const fetchOrders = async () => {
   loading.value = true;
   try {
-    const res = await client.get('orders'); 
+    const res = await client.get('orders/user'); 
     if (res.data?.data) {
        orders.value = res.data.data;
     }
