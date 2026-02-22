@@ -287,11 +287,14 @@ const handleLogout = () => {
   padding-bottom: 90px;
 }
 
+/* Deep Green Background that covers the top and curves under cards */
 .header-bg {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 380px;
-  background: linear-gradient(135deg, #a855f7, #3b82f6); /* Home gradient */
+  background: linear-gradient(135deg, #6366f1, #a855f7); /* Purple Gradient */
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
   z-index: 0;
   overflow: hidden;
 }
