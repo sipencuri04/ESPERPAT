@@ -24,6 +24,9 @@ class Cors extends BaseConfig
      *      maxAge: int,
      *  }
      */
+    /**
+     * CORS Configuration for ESPERPAT
+     */
     public array $default = [
         /**
          * Origins for the `Access-Control-Allow-Origin` header.
