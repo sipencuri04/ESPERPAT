@@ -260,15 +260,18 @@ const openEditModal = (type) => {
 const saveEdit = async () => {
   saving.value = true;
   try {
-    // API integration
-    setTimeout(() => {
-       saving.value = false;
-       editModalOpen.value = false;
-       alert('Password updated successfully!');
-    }, 500);
+     const res = await client.put('profile', { password: editValue.value });
+     if (res.data?.success) {
+         alert(res.data.message || 'Konfirmasi ganti password telah dikirim ke email Anda.');
+         editModalOpen.value = false;
+     } else {
+         alert(res.data?.message || 'Gagal merubah password.');
+     }
   } catch (err) {
-    console.error(err);
-    saving.value = false;
+     console.error(err);
+     alert(err.response?.data?.message || 'Terjadi kesalahan sistem.');
+  } finally {
+     saving.value = false;
   }
 };
 

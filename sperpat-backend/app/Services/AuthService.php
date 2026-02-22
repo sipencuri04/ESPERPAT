@@ -143,4 +143,73 @@ class AuthService
             return false;
         }
     }
+
+    public function requestPasswordChange(int $userId, string $newPassword): array
+    {
+        $user = $this->userModel->find($userId);
+        if (!$user) {
+            return ['success' => false, 'message' => 'User tak ditemukan.'];
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+        
+        $this->userModel->update($userId, ['verification_token' => 'PC:' . $token . '|' . $hash]);
+
+        $this->sendPasswordChangeEmail($user['email'], $user['name'], $token);
+
+        return ['success' => true];
+    }
+
+    protected function sendPasswordChangeEmail(string $email, string $name, string $token): bool
+    {
+        try {
+            $emailService = \Config\Services::email();
+            $emailService->setFrom(env('email.SMTPUser', 'noreply@esperpat.com'), 'ESPERPAT Store');
+            $emailService->setTo($email);
+            $emailService->setSubject('Konfirmasi Ganti Password - ESPERPAT Store');
+
+            $verifyUrl = base_url("api/confirm-password/{$token}");
+            
+            $message = "
+                <h2>Halo {$name},</h2>
+                <p>Kami menerima permintaan untuk mengganti password akun Anda di ESPERPAT Store.</p>
+                <p>Jika ini benar Anda, silakan klik link di bawah ini untuk mengonfirmasi perubahan password:</p>
+                <p><br><a href='{$verifyUrl}' style='display:inline-block;background:#a855f7;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;'>Konfirmasi Ganti Password</a><br></p>
+                <p>Atau copy link batas ini: {$verifyUrl}</p>
+                <p>Jika Anda tidak merasa melakukannya, abaikan email ini.</p>
+                <br>
+                <p>Salam,<br>ESPERPAT Store</p>
+            ";
+
+            $emailService->setMessage($message);
+            return $emailService->send();
+        } catch (\Exception $e) {
+            log_message('error', 'Password change email failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function confirmPasswordChange(string $token): array
+    {
+        $users = $this->userModel->like('verification_token', 'PC:' . $token . '|', 'after')->findAll();
+        if (empty($users)) {
+            return ['success' => false, 'message' => 'Token kedaluwarsa atau tidak valid.'];
+        }
+
+        $user = $users[0];
+        $parts = explode('|', str_replace('PC:', '', $user['verification_token']));
+        
+        if (count($parts) !== 2 || $parts[0] !== $token) {
+            return ['success' => false, 'message' => 'Token kedaluwarsa atau tidak valid.'];
+        }
+
+        $newHash = $parts[1];
+        $this->userModel->update($user['id'], [
+            'password' => $newHash,
+            'verification_token' => null
+        ]);
+
+        return ['success' => true, 'message' => 'Password berhasil diganti. Silakan login dengan password baru.'];
+    }
 }

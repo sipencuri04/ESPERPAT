@@ -94,6 +94,7 @@ $routes->group('api', function ($routes) {
     $routes->post('login', 'Api\AuthController::login');
     $routes->get('verify/(:segment)', 'Api\AuthController::verify/$1');
     $routes->post('resend-verification', 'Api\AuthController::resendVerification');
+    $routes->get('confirm-password/(:segment)', 'Api\AuthController::confirmPassword/$1');
 
     // Protected routes
     $routes->group('', ['filter' => 'jwt'], function ($routes) {

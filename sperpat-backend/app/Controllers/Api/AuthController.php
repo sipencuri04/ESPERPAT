@@ -84,7 +84,8 @@ class AuthController extends BaseApiController
         if (isset($data['address'])) $updateData['address'] = $data['address'];
 
         if (isset($data['password']) && !empty($data['password'])) {
-            $updateData['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+            $this->authService->requestPasswordChange($userData->id, $data['password']);
+            return $this->successResponse(null, 'Konfirmasi ganti password telah dikirim ke email Anda. Cek Gmail Anda untuk melanjutkan.');
         }
 
         if (!empty($updateData)) {
@@ -106,6 +107,30 @@ class AuthController extends BaseApiController
         }
 
         return $this->errorResponse($result['message']);
+    }
+
+    public function confirmPassword($token)
+    {
+        $result = $this->authService->confirmPasswordChange($token);
+
+        $style = "font-family: sans-serif; text-align: center; padding: 50px;";
+        $baseUrl = str_replace('backend/public/', '', env('app.baseURL')); // guess frontend url loosely
+        if ($result['success']) {
+            return "
+                <div style='$style'>
+                    <h2 style='color:#10b981;'>Berhasil!</h2>
+                    <p>{$result['message']}</p>
+                    <a href='{$baseUrl}login' style='display:inline-block;margin-top:20px;padding:10px 20px;background:#6366f1;color:white;text-decoration:none;border-radius:8px;'>Kembali ke Login</a>
+                </div>
+            ";
+        }
+
+        return "
+            <div style='$style'>
+                <h2 style='color:#ef4444;'>Gagal</h2>
+                <p>{$result['message']}</p>
+            </div>
+        ";
     }
 
     public function resendVerification()

@@ -165,19 +165,32 @@ const openEditModal = (type) => {
 const saveEdit = async () => {
   saving.value = true;
   try {
-    setTimeout(() => {
-       if (editType.value === 'profile') {
-          user.value.name = profileForm.value.name;
-          user.value.phone = profileForm.value.phone;
-          user.value.address = profileForm.value.address;
-       }
-       saving.value = false;
-       editModalOpen.value = false;
-       alert('Profile updated successfully!');
-    }, 500);
+     const payload = {};
+     if (editType.value === 'password') {
+         payload.password = editValue.value;
+     } else if (editType.value === 'profile') {
+         payload.name = profileForm.value.name;
+         payload.phone = profileForm.value.phone;
+         payload.address = profileForm.value.address;
+     }
+
+     const res = await client.put('profile', payload);
+     if (res.data?.success) {
+         if (editType.value === 'profile') {
+             user.value.name = payload.name;
+             user.value.phone = payload.phone;
+             user.value.address = payload.address;
+         }
+         alert(res.data.message || 'Profile updated successfully!');
+         editModalOpen.value = false;
+     } else {
+         alert(res.data?.message || 'Update gagal.');
+     }
   } catch (err) {
-    console.error(err);
-    saving.value = false;
+     console.error(err);
+     alert(err.response?.data?.message || 'Terjadi kesalahan sistem.');
+  } finally {
+     saving.value = false;
   }
 };
 
