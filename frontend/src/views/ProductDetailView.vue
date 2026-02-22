@@ -10,7 +10,7 @@
         <button @click="$router.back()" class="back-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         </button>
-        <span class="title">Product Detail</span>
+        <span class="title">PRODUCT DETAIL</span>
         <div class="header-actions">
            <router-link to="/cart" class="icon-btn-circle">
              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -28,7 +28,7 @@
 
       <!-- Thumbnails -->
       <div class="thumbnails">
-        <div v-for="i in 4" :key="i" :class="['thumb-box', { active: i === 1 }]">
+        <div v-for="i in 3" :key="i" :class="['thumb-box', { active: i === 1 }]">
           <div class="thumb-inner">
              <img :src="baseUrl + product.image" v-if="product.image" />
              <img src="https://placehold.co/100x100/f8fafc/999?text=View" v-else />
@@ -122,7 +122,7 @@ onMounted(fetchProduct);
 <style scoped>
 .product-detail {
   min-height: 100vh;
-  background: #f4f5f7; /* Matching Homepage Gray */
+  background: #f8fafc;
 }
 
 .top-bar {
@@ -132,21 +132,21 @@ onMounted(fetchProduct);
   padding: 1.25rem 1.5rem;
   position: sticky;
   top: 0;
-  background: #f4f5f7;
+  background: transparent;
   z-index: 100;
 }
 
 .top-bar .title {
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #111;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .back-btn, .icon-btn-circle {
   background: white;
-  border: 1px solid #f1f5f9;
+  border: none;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -154,7 +154,7 @@ onMounted(fetchProduct);
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
   transition: all 0.2s;
 }
 
@@ -169,20 +169,20 @@ onMounted(fetchProduct);
 
 .main-image-bg {
   background: white;
-  border-radius: 30px;
-  height: 320px;
+  border-radius: 35px;
+  height: 380px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  border: none;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.03);
 }
 
 .main-img {
-  max-width: 85%;
-  max-height: 85%;
+  max-width: 80%;
+  max-height: 80%;
   object-fit: contain;
   filter: drop-shadow(0 15px 25px rgba(0,0,0,0.08));
 }
@@ -190,16 +190,16 @@ onMounted(fetchProduct);
 /* Thumbnails */
 .thumbnails {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
   padding: 0 1.5rem;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 }
 
 .thumb-box {
-  width: 70px;
-  height: 70px;
-  border-radius: 16px;
+  width: 75px;
+  height: 75px;
+  border-radius: 20px;
   background: white;
   display: flex;
   align-items: center;
@@ -207,14 +207,15 @@ onMounted(fetchProduct);
   border: 1.5px solid transparent;
   padding: 2px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  transition: all 0.2s;
 }
 
 .thumb-inner {
   width: 100%;
   height: 100%;
-  background: #f8fafc;
-  border-radius: 12px;
+  background: white;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,7 +228,8 @@ onMounted(fetchProduct);
 }
 
 .thumb-box.active {
-  border-color: #8b5cf6;
+  border-color: #a855f7;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
 }
 
 /* Info Card Style */
@@ -235,8 +237,8 @@ onMounted(fetchProduct);
   background: white;
   border-top-left-radius: 35px;
   border-top-right-radius: 35px;
-  padding: 30px 1.5rem 120px;
-  border: 1px solid #f1f5f9;
+  padding: 30px 1.5rem 140px;
+  border: none;
   box-shadow: 0 -10px 40px rgba(0,0,0,0.02);
 }
 
@@ -331,32 +333,37 @@ onMounted(fetchProduct);
 /* Action Footer */
 .action-footer {
   position: fixed;
-  bottom: 0;
+  bottom: 25px;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  padding: 20px 1.5rem 40px;
-  background: white;
+  width: calc(100% - 3rem);
+  max-width: calc(480px - 3rem);
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
-  gap: 16px;
+  gap: 12px;
   z-index: 1000;
-  box-shadow: 0 -10px 40px rgba(0,0,0,0.05);
-  border-top: 1px solid #f1f5f9;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.08); /* Soft floating shadow */
+  border-radius: 100px; /* Fully rounded pill container */
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .cart-btn-circle {
   width: 58px;
   height: 58px;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
-  border-radius: 18px;
+  background: white;
+  border: none;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #111;
   cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Slight elevation */
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .cart-btn-circle:active {
@@ -368,17 +375,17 @@ onMounted(fetchProduct);
   height: 58px;
   color: white;
   border: none;
-  font-weight: 900;
+  font-weight: 800;
   font-size: 1rem;
-  border-radius: 18px;
+  border-radius: 999px; /* Pill shaped */
   cursor: pointer;
-  letter-spacing: 1px;
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25);
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3); /* Soft purple glow */
   transition: all 0.3s;
 }
 
 .gradient-purple {
-  background: linear-gradient(90deg, #6366f1, #a855f7);
+  background: linear-gradient(135deg, #a855f7, #6366f1);
 }
 
 .buy-now-btn:active {
