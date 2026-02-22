@@ -115,7 +115,7 @@
             <div class="handle"></div>
             <div class="confirm-head">
               <div class="icon-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               </div>
               <h3>Konfirmasi Pesanan</h3>
               <p>Apakah anda yakin ingin melakukan checkout sekarang?</p>
@@ -601,23 +601,24 @@ const finishCheckout = () => {
 
 .confirm-head { text-align: center; margin-bottom: 2rem; }
 .icon-circle {
-  width: 65px; height: 65px; background: #f0fdf4; 
+  width: 65px; height: 65px; background: #faf5ff; 
   border-radius: 50%; display: flex; align-items: center; 
   justify-content: center; margin: 0 auto 1.5rem;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.1);
 }
 .confirm-head h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; }
 .confirm-head p { font-size: 0.85rem; color: #999; line-height: 1.5; }
 
 .confirm-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
 .btn-no {
-  height: 56px; border-radius: 18px; border: 1px solid #eee;
-  background: white; font-weight: 700; cursor: pointer;
+  height: 56px; border-radius: 18px; border: 1px solid #f1f5f9;
+  background: #f8fafc; font-weight: 700; cursor: pointer; color: #475569;
 }
 .btn-yes {
   height: 56px; border-radius: 18px; border: none;
-  background: #22c55e; color: white; font-weight: 800;
+  background: linear-gradient(135deg, #a855f7, #6366f1); color: white; font-weight: 800;
   font-size: 1rem; cursor: pointer;
-  box-shadow: 0 10px 20px rgba(34,197,94,0.2);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
 }
 
 /* Success Overlay */
@@ -634,10 +635,10 @@ const finishCheckout = () => {
 
 .success-card { text-align: center; }
 .success-icon {
-  width: 100px; height: 100px; background: #22c55e;
+  width: 100px; height: 100px; background: linear-gradient(135deg, #a855f7, #6366f1);
   border-radius: 50%; display: flex; align-items: center;
   justify-content: center; margin: 0 auto 2rem;
-  box-shadow: 0 15px 35px rgba(34,197,94,0.3);
+  box-shadow: 0 15px 35px rgba(139, 92, 246, 0.35);
 }
 
 .success-card h2 { font-size: 1.75rem; font-weight: 900; margin-bottom: 12px; }
@@ -646,7 +647,7 @@ const finishCheckout = () => {
 .btn-finish {
   width: 100%;
   height: 60px;
-  background: #111;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
   color: white;
   border: none;
   border-radius: 20px;
