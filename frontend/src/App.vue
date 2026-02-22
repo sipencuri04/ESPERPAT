@@ -6,10 +6,17 @@ import { useCartStore } from './stores/cart';
 const route = useRoute();
 const cartStore = useCartStore();
 const isNavHidden = computed(() => {
-  const hiddenNames = ['products', 'product-detail', 'cart', 'login', 'profile', 'customer-orders', 'my-profile'];
+  const hiddenNames = ['login', 'register'];
   return hiddenNames.includes(route.name) || 
          String(route.name).startsWith('admin-') || 
          String(route.name).startsWith('superuser-');
+});
+
+const showBottomNav = computed(() => {
+  const hiddenNames = ['login', 'register'];
+  if (hiddenNames.includes(route.name)) return false;
+  if (String(route.name).startsWith('admin-') || String(route.name).startsWith('superuser-')) return false;
+  return true;
 });
 
 
@@ -42,6 +49,22 @@ const isNavHidden = computed(() => {
         </div>
       </router-link>
     </transition>
+    <!-- Bottom Mobile Navigation -->
+    <div v-if="showBottomNav" class="bottom-dock animate-fade-up">
+      <router-link to="/" class="dock-item" :class="{ 'router-link-active': route.name === 'home' }">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span class="dock-label">Home</span>
+      </router-link>
+      <router-link to="/products" class="dock-item" :class="{ 'router-link-active': ['products', 'product-detail'].includes(route.name) }">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+        <span class="dock-label">Produk</span>
+      </router-link>
+      <router-link to="/profile" class="dock-item" :class="{ 'router-link-active': ['profile', 'my-profile', 'customer-orders'].includes(route.name) }">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span class="dock-label">Profil</span>
+      </router-link>
+    </div>
+
   </div>
 </template>
 
@@ -92,7 +115,7 @@ const isNavHidden = computed(() => {
 }
 
 .main-content {
-  padding-bottom: 20px;
+  padding-bottom: 90px;
 }
 
 /* White Bottom Dock matching mockup */
@@ -195,7 +218,7 @@ const isNavHidden = computed(() => {
 /* Global Floating Cart Styles */
 .floating-cart {
   position: fixed;
-  bottom: 30px;
+  bottom: 95px;
   left: calc(50% + 150px); /* Adjust to stay inside 480px frame but to the right */
   transform: translateX(-50%);
   width: 60px;
