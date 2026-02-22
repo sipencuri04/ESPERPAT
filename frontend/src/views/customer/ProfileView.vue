@@ -261,7 +261,7 @@ const saveEdit = async () => {
   saving.value = true;
   try {
      const res = await client.put('profile', { password: editValue.value });
-     if (res.data?.success) {
+     if (res.data?.status) {
          alert(res.data.message || 'Konfirmasi ganti password telah dikirim ke email Anda.');
          editModalOpen.value = false;
      } else {

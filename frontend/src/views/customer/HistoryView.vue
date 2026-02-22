@@ -288,7 +288,7 @@ const openOrderDetail = async (id) => {
    isModalOpen.value = true;
    try {
        const res = await client.get('orders/' + id);
-       if (res.data?.success) {
+       if (res.data?.status) {
            selectedOrder.value = res.data.data;
        }
    } catch(e) {

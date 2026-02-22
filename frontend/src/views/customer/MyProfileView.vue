@@ -175,7 +175,7 @@ const saveEdit = async () => {
      }
 
      const res = await client.put('profile', payload);
-     if (res.data?.success) {
+     if (res.data?.status) {
          if (editType.value === 'profile') {
              user.value.name = payload.name;
              user.value.phone = payload.phone;
