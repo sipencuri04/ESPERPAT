@@ -122,14 +122,19 @@
               Belum ada promo yang tersedia.
            </div>
            
-           <div v-for="promo in availablePromos" :key="promo.id" class="voucher-card">
+           <div v-for="promo in availablePromos" :key="promo.id" :class="['voucher-card', { exhausted: promo.quota <= 0 }]">
               <div class="v-left">
                  <div class="v-disc">{{ promo.discount_type === 'percent' ? promo.discount_value + '%' : 'Rp ' + promo.discount_value }}</div>
                  <div class="v-type">{{ promo.discount_type === 'percent' ? 'Diskon' : 'Potongan' }}</div>
               </div>
               <div class="v-right">
                  <!-- Tampilan Info -->
-                 <div v-if="!promo.claimed" class="v-reveal">
+                 <div v-if="promo.quota <= 0" class="v-exhausted">
+                    <h4>Voucher Habis!</h4>
+                    <p>Kuota promo ini sudah habis</p>
+                    <button class="claim-btn disabled-claim" disabled>Habis</button>
+                 </div>
+                 <div v-else-if="!promo.claimed" class="v-reveal">
                     <h4>Kode Rahasia</h4>
                     <p>********</p>
                     <button class="claim-btn" @click="doClaim(promo)">Klaim</button>
@@ -589,6 +594,12 @@ const handleLogout = () => {
 
 .v-reveal h4, .v-claimed h4 { font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
 .v-reveal p { font-size: 1.2rem; font-weight: 900; color: #94a3b8; letter-spacing: 2px; margin-bottom: 8px;}
+
+/* Habis State */
+.voucher-card.exhausted .v-left { background: linear-gradient(135deg, #ef4444, #f87171); opacity: 0.9; }
+.v-exhausted h4 { font-size: 0.85rem; font-weight: 800; color: #ef4444; margin-bottom: 4px; }
+.v-exhausted p { font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; font-weight: 600;}
+.disabled-claim { background: #e2e8f0 !important; color: #94a3b8 !important; cursor: not-allowed !important; box-shadow: none !important; }
 
 .claim-btn {
   background: #111;
