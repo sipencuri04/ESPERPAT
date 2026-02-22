@@ -1,18 +1,6 @@
 <template>
-  <div class="products-view" 
-       @touchstart="handleTouchStart" 
-       @touchmove="handleTouchMove" 
-       @touchend="handleTouchEnd">
+  <div class="products-view">
     
-    <!-- Pull to Go Back Indicator -->
-    <div class="pull-indicator" :style="{ height: pullDistance + 'px', opacity: pullDistance / 100 }">
-       <div class="pull-content" :class="{ 'ready': pullDistance > 100 }">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" :style="{ transform: `rotate(${Math.min(pullDistance * 1.8, 180)}deg)` }"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-          <span v-if="pullDistance > 100">Release to go home</span>
-          <span v-else>Pull to go home</span>
-       </div>
-    </div>
-
     <header class="page-header">
       <h2>Popular Products</h2>
     </header>
@@ -87,38 +75,7 @@ const loading = ref(true);
 const search = ref('');
 const baseUrl = 'https://esperpat-api.atech.my.id/';
 
-// Pull to go back logic
-const startY = ref(0);
-const pullDistance = ref(0);
-const isAtTop = ref(true);
 
-const handleTouchStart = (e) => {
-  if (window.scrollY <= 0) {
-    startY.value = e.touches[0].pageY;
-    isAtTop.value = true;
-  } else {
-    isAtTop.value = false;
-  }
-};
-
-const handleTouchMove = (e) => {
-  if (!isAtTop.value) return;
-  
-  const currentY = e.touches[0].pageY;
-  const diff = currentY - startY.value;
-  
-  if (diff > 0 && window.scrollY <= 0) {
-    pullDistance.value = Math.pow(diff, 0.8); // Resistance effect
-    if (pullDistance.value > 120) pullDistance.value = 120; // Cap
-  }
-};
-
-const handleTouchEnd = () => {
-  if (pullDistance.value > 100) {
-    router.push('/');
-  }
-  pullDistance.value = 0;
-};
 
 const fetchProducts = async () => {
   loading.value = true;
@@ -164,32 +121,7 @@ onMounted(() => {
   overscroll-behavior-y: contain; /* Prevents browser pull-to-refresh */
 }
 
-.pull-indicator {
-  width: 100%;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: transparent;
-  transition: height 0.1s ease-out;
-}
 
-.pull-content {
-  padding-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: #a855f7;
-  font-weight: 700;
-  font-size: 0.8rem;
-  transition: all 0.3s;
-}
-
-.pull-content.ready {
-  color: #6366f1;
-  transform: scale(1.1);
-}
 
 .products-view * {
   box-sizing: border-box;

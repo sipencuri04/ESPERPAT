@@ -87,8 +87,6 @@
         </div>
       </section>
 
-      <!-- Scroll Sentinel -->
-      <div ref="bottomSentinel" style="height: 20px;"></div>
     </div>
   </div>
 </template>
@@ -142,8 +140,6 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
-const bottomSentinel = ref(null);
-let observer = null;
 
 onMounted(() => {
   user.value = {
@@ -151,28 +147,6 @@ onMounted(() => {
   };
 
   fetchProducts();
-  
-  // Use a slight delay before initializing observer to prevent instant-trigger on load
-  setTimeout(() => {
-    observer = new IntersectionObserver((entries) => {
-      // Only trigger if intersecting AND user has actually scrolled down a bit
-      if (entries[0].isIntersecting && window.scrollY > 20) {
-        observer.disconnect(); 
-        router.push('/products');
-      }
-    }, {
-      root: null,
-      threshold: 0.1 
-    });
-    
-    if (bottomSentinel.value) {
-      observer.observe(bottomSentinel.value);
-    }
-  }, 500);
-});
-
-onUnmounted(() => {
-  if (observer) { observer.disconnect(); }
 });
 </script>
 
