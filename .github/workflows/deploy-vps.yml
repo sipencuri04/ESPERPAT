@@ -1,0 +1,42 @@
+name: Deploy Backend to VPS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sperpat-backend/**' # Hanya jalan jika ada perubahan di folder sperpat-backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}       # IP VPS dari Secrets GitHub
+          username: ${{ secrets.VPS_USER }}   # Username (misal: root atau ubuntu)
+          password: ${{ secrets.VPS_PASSWORD }} # Password VPS / Private Key
+          # Atau gunakan key jika pakai SSH key instead of password:
+          # key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Arahkan ke folder project di VPS (Sesuaikan path ini)
+            cd /var/www/sperpat-backend
+            
+            # Ambil update terbaru dari git
+            git pull origin main
+            
+            # (Opsional) Install dependency composer jika ada update
+            # composer install --no-dev --optimize-autoloader
+            
+            # (Opsional) Jalankan migrasi database jika ada
+            # php spark migrate
+            
+            # Sesuaikan permission jika dibutuhkan
+            chown -R www-data:www-data writable
+            
+            echo "Deployment Backend Berhasil!"
