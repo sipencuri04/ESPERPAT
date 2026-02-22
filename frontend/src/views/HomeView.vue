@@ -65,9 +65,8 @@
               <!-- Top Badges -->
               <div class="top-badges">
                 <span :class="idx % 2 === 0 ? 'badge-green' : 'badge-orange'">{{ idx % 2 === 0 ? 'Ready' : 'Hampir Habis' }}</span>
-                <div class="badge-purple-box">
-                  <span class="percent">20%</span>
-                  <span class="off">OFF</span>
+                <div class="badge-purple-box" v-if="product.voucher_id || product.discount">
+                  <span class="percent">{{ product.discount || 'VOUCHER' }}</span>
                 </div>
               </div>
               

@@ -37,9 +37,8 @@
         <div class="card-image-wrapper">
           <div class="top-badges">
             <span class="badge-green">Ready</span>
-            <div class="badge-purple-box">
-              <span class="percent">20%</span>
-              <span class="off">OFF</span>
+            <div class="badge-purple-box" v-if="product.voucher_id || product.discount">
+              <span class="percent">{{ product.discount || 'VOUCHER' }}</span>
             </div>
           </div>
           <img :src="baseUrl + product.image" v-if="product.image" class="card-img" />
