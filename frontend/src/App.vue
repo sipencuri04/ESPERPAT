@@ -129,9 +129,9 @@ const showBottomNav = computed(() => {
   background: white;
   height: 75px;
   display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
-  padding-bottom: 15px;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 0;
   z-index: 1000;
   border-top: 1px solid #f1f5f9;
   border-top-left-radius: 20px;
