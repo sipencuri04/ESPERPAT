@@ -124,14 +124,14 @@ const handleLogin = async () => {
 .logo-box {
   width: 56px;
   height: 56px;
-  background: #014A43;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
   color: #fff;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(1, 74, 67, 0.2);
+  box-shadow: 0 6px 15px rgba(168, 85, 247, 0.3);
 }
 
 h1 {
@@ -172,7 +172,7 @@ h1 {
 .icon-dark {
   width: 32px;
   height: 32px;
-  background: #014A43;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
   color: white;
   border-radius: 10px;
   display: flex;
@@ -202,7 +202,7 @@ h1 {
 
 .forgot-pass a {
   font-size: 0.85rem;
-  color: #014A43;
+  color: #6366f1;
   font-weight: 700;
   text-decoration: none;
 }
@@ -223,7 +223,7 @@ h1 {
 }
 
 .active-btn {
-  background: #014A43;
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
   color: white;
 }
 
