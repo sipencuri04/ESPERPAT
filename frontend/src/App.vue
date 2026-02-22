@@ -19,9 +19,16 @@ const isNavHidden = computed(() => {
   <div class="app-container">
 
     <main class="main-content">
-      <RouterView v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
+      <RouterView v-slot="{ Component, route }">
+        <transition name="fade-slide" mode="out-in">
+          <Suspense>
+            <template #default>
+              <component :is="Component" :key="route.name" />
+            </template>
+            <template #fallback>
+              <div class="loading-skeleton"></div>
+            </template>
+          </Suspense>
         </transition>
       </RouterView>
     </main>
@@ -155,11 +162,30 @@ const isNavHidden = computed(() => {
 }
 
 /* Transitions */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s ease;
+/* Fade-Slide Transitions for Routes */
+.fade-slide-enter-active, .fade-slide-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-slide-enter-from {
   opacity: 0;
+  transform: translateX(10px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+/* Base Skeleton Loader */
+.loading-skeleton {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 @media (min-width: 481px) {
