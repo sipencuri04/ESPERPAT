@@ -196,14 +196,11 @@ const handleLogout = () => {
   padding-bottom: 90px;
 }
 
-/* Deep Green Header Background */
 .header-bg {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 250px;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
-  border-bottom-left-radius: 40px;
-  border-bottom-right-radius: 40px;
+  background: linear-gradient(135deg, #a855f7, #3b82f6);
   z-index: 0;
   overflow: hidden;
 }
