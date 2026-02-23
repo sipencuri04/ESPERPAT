@@ -510,7 +510,7 @@ class AdvancedReportController extends BaseApiController
                 'qty' => 0,
                 'old_price' => 0,
                 'new_price' => 0,
-                'diff' => 0
+                'diff' => '0'
             ];
 
             // Parsing logic based on: "Restok Barang: Name (Qty pcs) | H.Beli: Old -> New (Selisih: Diff)"

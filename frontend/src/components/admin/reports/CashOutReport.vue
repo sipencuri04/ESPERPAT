@@ -44,9 +44,10 @@
               <td>{{ formatCurrency(exp.old_price).replace('Rp', '').trim() }}</td>
               <td>{{ formatCurrency(exp.new_price).replace('Rp', '').trim() }}</td>
               <td>
-                 <span :class="{'text-red': exp.diff.includes('+'), 'text-green': exp.diff.includes('-')}">
+                 <span v-if="exp.diff" :class="{'text-red': String(exp.diff).includes('+'), 'text-green': String(exp.diff).includes('-')}">
                     {{ exp.diff }}
                  </span>
+                 <span v-else>-</span>
               </td>
               <td>{{ new Date(exp.date).toLocaleDateString('id-ID') }}</td>
               <td class="text-right text-red">{{ formatCurrency(exp.amount) }}</td>
