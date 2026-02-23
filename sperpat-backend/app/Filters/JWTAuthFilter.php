@@ -14,6 +14,11 @@ class JWTAuthFilter implements FilterInterface
         $jwtService = new JWTService();
         $token = $jwtService->getTokenFromHeader();
 
+        // If no header token, check for 'token' query parameter (useful for file downloads)
+        if (!$token) {
+            $token = $request->getGet('token');
+        }
+
         if (!$token) {
             return service('response')
                 ->setStatusCode(401)
