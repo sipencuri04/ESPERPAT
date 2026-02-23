@@ -71,8 +71,8 @@ class OrderController extends BaseApiController
                 return $this->errorResponse("Kuantitas barang (qty) tidak valid. Harus lebih dari 0.", 400);
             }
 
-            // Mengunci baris produk ini agar request lain mengantre (Pessimistic Locking) mencegah stok minus
-            $productQuery = $db->table('products')->where('id', $item['product_id'])->getForUpdate();
+            // Pessimistic Locking via raw SQL SELECT...FOR UPDATE
+            $productQuery = $db->query("SELECT * FROM products WHERE id = ? FOR UPDATE", [$item['product_id']]);
             $product = $productQuery ? $productQuery->getRowArray() : null;
 
             if (!$product) {
