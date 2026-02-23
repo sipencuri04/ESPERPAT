@@ -499,12 +499,45 @@ class AdvancedReportController extends BaseApiController
                                        ->orderBy('date', 'DESC')
                                        ->findAll();
         
+        $parsedExpenses = [];
+        foreach ($expenses as $e) {
+            $data = [
+                'id' => $e['id'],
+                'date' => $e['date'],
+                'amount' => $e['amount'],
+                'original_description' => $e['description'],
+                'product_name' => '-',
+                'qty' => 0,
+                'old_price' => 0,
+                'new_price' => 0,
+                'diff' => 0
+            ];
+
+            // Parsing logic based on: "Restok Barang: Name (Qty pcs) | H.Beli: Old -> New (Selisih: Diff)"
+            if (preg_match('/Restok Barang: (.*) \((\d+) pcs\)/', $e['description'], $matches)) {
+                $data['product_name'] = $matches[1];
+                $data['qty'] = (int)$matches[2];
+            }
+
+            if (preg_match('/H\.Beli: ([\d.,]+) -> ([\d.,]+) \(Selisih: ([+-][\d.,]+)\)/', $e['description'], $matches)) {
+                $data['old_price'] = str_replace(['.', ','], '', $matches[1]);
+                $data['new_price'] = str_replace(['.', ','], '', $matches[2]);
+                $data['diff'] = $matches[3];
+            } else if ($data['qty'] > 0) {
+                // If no price change info, calculate from total
+                $data['new_price'] = $e['amount'] / $data['qty'];
+                $data['old_price'] = $data['new_price'];
+            }
+
+            $parsedExpenses[] = $data;
+        }
+        
         $totalAmount = array_sum(array_column($expenses, 'amount'));
         
         return $this->successResponse([
             'total_amount' => $totalAmount,
             'count'        => count($expenses),
-            'expenses'     => $expenses
+            'expenses'     => $parsedExpenses
         ]);
     }
 
@@ -520,13 +553,33 @@ class AdvancedReportController extends BaseApiController
         $totalAmount = array_sum(array_column($expenses, 'amount'));
         $filename = "Laporan_Kas_Keluar_Restok_" . date('Ymd_His');
 
+        $parsed = [];
+        foreach ($expenses as $e) {
+            $item = [
+                'name' => 'Restok', 'qty' => 0, 'old' => 0, 'new' => 0, 'diff' => '0', 'date' => $e['date'], 'total' => $e['amount']
+            ];
+            if (preg_match('/Restok Barang: (.*) \((\d+) pcs\)/', $e['description'], $matches)) {
+                $item['name'] = $matches[1];
+                $item['qty'] = (int)$matches[2];
+            }
+            if (preg_match('/H\.Beli: ([\d.,]+) -> ([\d.,]+) \(Selisih: ([+-][\d.,]+)\)/', $e['description'], $matches)) {
+                $item['old'] = (float)str_replace('.', '', $matches[1]);
+                $item['new'] = (float)str_replace('.', '', $matches[2]);
+                $item['diff'] = $matches[3];
+            } else if ($item['qty'] > 0) {
+                $item['new'] = $e['amount'] / $item['qty'];
+                $item['old'] = $item['new'];
+            }
+            $parsed[] = $item;
+        }
+
         if ($type === 'excel') {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-            $sheet->setCellValue('A1', 'LAPORAN KAS KELUAR (RESTOK) ESPERPAT');
+            $sheet->setCellValue('A1', 'LAPORAN DETAIL KAS KELUAR (RESTOK) ESPERPAT');
             $sheet->setCellValue('A2', "Periode: $startDate s/d $endDate");
             
-            $headers = ['No', 'Deskripsi', 'Tanggal', 'Jumlah'];
+            $headers = ['No', 'Nama Barang', 'Qty', 'Harga Lama', 'Harga Baru', 'Selisih', 'Tanggal', 'Total'];
             $col = 'A';
             foreach ($headers as $h) { 
                 $sheet->setCellValue($col . '4', $h); 
@@ -535,19 +588,25 @@ class AdvancedReportController extends BaseApiController
             }
 
             $row = 5; $no = 1;
-            foreach ($expenses as $e) {
+            foreach ($parsed as $p) {
                 $sheet->setCellValue('A' . $row, $no++);
-                $sheet->setCellValue('B' . $row, $e['description']);
-                $sheet->setCellValue('C' . $row, date('d/m/Y', strtotime($e['date'])));
-                $sheet->setCellValue('D' . $row, $e['amount']);
-                $sheet->getStyle('D' . $row)->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->setCellValue('B' . $row, $p['name']);
+                $sheet->setCellValue('C' . $row, $p['qty']);
+                $sheet->setCellValue('D' . $row, $p['old']);
+                $sheet->setCellValue('E' . $row, $p['new']);
+                $sheet->setCellValue('F' . $row, $p['diff']);
+                $sheet->setCellValue('G' . $row, date('d/m/Y', strtotime($p['date'])));
+                $sheet->setCellValue('H' . $row, $p['total']);
+                
+                $sheet->getStyle('D'.$row.':E'.$row)->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle('H' . $row)->getNumberFormat()->setFormatCode('#,##0');
                 $row++;
             }
             
-            $sheet->setCellValue('C' . $row, 'TOTAL KAS KELUAR');
-            $sheet->setCellValue('D' . $row, $totalAmount);
-            $sheet->getStyle('C' . $row.':D'.$row)->getFont()->setBold(true);
-            $sheet->getStyle('D' . $row)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->setCellValue('G' . $row, 'TOTAL KAS KELUAR');
+            $sheet->setCellValue('H' . $row, $totalAmount);
+            $sheet->getStyle('G' . $row.':H'.$row)->getFont()->setBold(true);
+            $sheet->getStyle('H' . $row)->getNumberFormat()->setFormatCode('#,##0');
 
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
@@ -555,29 +614,33 @@ class AdvancedReportController extends BaseApiController
             $writer->save('php://output');
             exit;
         } else {
-            $html = '<style>body{font-family:sans-serif;font-size:12px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#eee;}</style>';
-            $html .= '<h2>LAPORAN KAS KELUAR (RESTOK) ESPERPAT</h2>';
+            $html = '<style>body{font-family:sans-serif;font-size:10px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:6px;text-align:left;} th{background:#eee;}</style>';
+            $html .= '<h2>LAPORAN DETAIL KAS KELUAR (RESTOK)</h2>';
             $html .= '<p>Periode: '.$startDate.' s/d '.$endDate.'</p>';
             $html .= '<table>';
-            $html .= '<thead><tr><th>No</th><th>Deskripsi</th><th>Tanggal</th><th style="text-align:right">Jumlah</th></tr></thead>';
+            $html .= '<thead><tr><th>No</th><th>Nama Barang</th><th>Qty</th><th>H.Lama</th><th>H.Baru</th><th>Selisih</th><th>Tanggal</th><th style="text-align:right">Total</th></tr></thead>';
             $html .= '<tbody>';
             $no = 1;
-            foreach ($expenses as $e) {
+            foreach ($parsed as $p) {
                 $html .= '<tr>';
                 $html .= '<td>'.$no++.'</td>';
-                $html .= '<td>'.$e['description'].'</td>';
-                $html .= '<td>'.date('d/m/Y', strtotime($e['date'])).'</td>';
-                $html .= '<td style="text-align:right">Rp '.number_format($e['amount'], 0, ',', '.').'</td>';
+                $html .= '<td>'.$p['name'].'</td>';
+                $html .= '<td>'.$p['qty'].'</td>';
+                $html .= '<td>'.number_format($p['old'], 0, ',', '.').'</td>';
+                $html .= '<td>'.number_format($p['new'], 0, ',', '.').'</td>';
+                $html .= '<td>'.$p['diff'].'</td>';
+                $html .= '<td>'.date('d/m/Y', strtotime($p['date'])).'</td>';
+                $html .= '<td style="text-align:right">'.number_format($p['total'], 0, ',', '.').'</td>';
                 $html .= '</tr>';
             }
-            $html .= '<tr style="font-weight:bold; background:#f9f9f9;"><td colspan="3" style="text-align:right">TOTAL KAS KELUAR</td><td style="text-align:right">Rp '.number_format($totalAmount, 0, ',', '.').'</td></tr>';
+            $html .= '<tr style="font-weight:bold; background:#f9f9f9;"><td colspan="7" style="text-align:right">TOTAL KAS KELUAR</td><td style="text-align:right">Rp '.number_format($totalAmount, 0, ',', '.').'</td></tr>';
             $html .= '</tbody></table>';
 
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
             $dompdf->stream($filename . ".pdf", ["Attachment" => true]);
             exit;

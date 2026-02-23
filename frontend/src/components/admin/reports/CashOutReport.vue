@@ -28,20 +28,25 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Deskripsi</th>
+              <th>Produk</th>
+              <th>Qty</th>
+              <th>H.Lama</th>
+              <th>H.Baru</th>
+              <th>Selisih</th>
               <th>Tanggal</th>
-              <th class="text-right">Jumlah</th>
+              <th class="text-right">Total</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="exp in data.expenses" :key="exp.id">
+              <td><strong>{{ exp.product_name }}</strong></td>
+              <td>{{ exp.qty }}</td>
+              <td>{{ formatCurrency(exp.old_price).replace('Rp', '').trim() }}</td>
+              <td>{{ formatCurrency(exp.new_price).replace('Rp', '').trim() }}</td>
               <td>
-                <div class="main-desc"><strong>{{ exp.description.split('|')[0] }}</strong></div>
-                <div v-if="exp.description.includes('|')" class="price-changes">
-                   <div v-for="(line, li) in exp.description.split('|').slice(1)" :key="li" class="change-line">
-                      {{ line.trim() }}
-                   </div>
-                </div>
+                 <span :class="{'text-red': exp.diff.includes('+'), 'text-green': exp.diff.includes('-')}">
+                    {{ exp.diff }}
+                 </span>
               </td>
               <td>{{ new Date(exp.date).toLocaleDateString('id-ID') }}</td>
               <td class="text-right text-red">{{ formatCurrency(exp.amount) }}</td>
@@ -109,21 +114,18 @@ onMounted(loadData);
 .card span { font-size: 0.55rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card h3 { font-size: 0.85rem; font-weight: 900; margin: 2px 0; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card small { font-size: 0.55rem; display: block; line-height: 1.1; margin-top: 2px; }
-.text-red { color: #ef4444; font-weight: 600; }
+.text-red { color: #ef4444; font-weight: 700; }
+.text-green { color: #10b981; font-weight: 700; }
 .text-muted { color: #94a3b8; }
 
 .mt-4 { margin-top: 15px; }
 h5 { margin-bottom: 8px; font-weight: 800; color: #334155; font-size: 0.75rem; }
 .table-container { border: 1px solid #e2e8f0; border-radius: 10px; overflow-x: auto; background: white; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.65rem; table-layout: fixed; }
-.data-table th { background: #f8fafc; text-align: left; padding: 6px 8px; font-size: 0.55rem; text-transform: uppercase; color: #475569; border-bottom: 1px solid #cbd5e1; }
-.data-table td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.6rem; table-layout: auto; }
+.data-table th { background: #f8fafc; text-align: left; padding: 6px 4px; font-size: 0.55rem; text-transform: uppercase; color: #475569; border-bottom: 1px solid #cbd5e1; white-space: nowrap; }
+.data-table td { padding: 6px 4px; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 600; }
 .text-right { text-align: right; }
 .text-center { text-align: center; }
-
-.main-desc { font-size: 0.7rem; color: #1e293b; }
-.price-changes { margin-top: 4px; padding-top: 4px; border-top: 1px dotted #e2e8f0; }
-.change-line { font-size: 0.55rem; color: #6366f1; font-weight: 600; line-height: 1.3; }
 
 .loader { padding: 15px; font-size: 0.7rem; text-align: center; color: #94a3b8; }
 </style>
