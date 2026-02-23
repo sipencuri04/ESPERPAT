@@ -51,10 +51,30 @@ class ProductController extends BaseApiController
             return $this->errorResponse('Gagal merekam update stok barang.', 400, $this->productModel->errors());
         }
 
-        // 2. Record Expense (Cash Out)
+        // 2. Prepare Detailed Description
+        $oldBeli = (float)$product['harga_beli'];
+        $oldJual = (float)$product['harga_jual'];
+        
+        $desc = "Restok Barang: " . $product['name'] . " ($qty pcs)";
+        
+        // Add Price Buy Change info
+        if ($hargaBeli != $oldBeli) {
+            $diffBeli = $hargaBeli - $oldBeli;
+            $diffStr = ($diffBeli > 0 ? "+" : "") . number_format($diffBeli, 0, ',', '.');
+            $desc .= " | H.Beli: " . number_format($oldBeli, 0, ',', '.') . " -> " . number_format($hargaBeli, 0, ',', '.') . " (Selisih: $diffStr)";
+        }
+        
+        // Add Price Sell Change info
+        if ($hargaJual != $oldJual) {
+            $diffJual = $hargaJual - $oldJual;
+            $diffStrJ = ($diffJual > 0 ? "+" : "") . number_format($diffJual, 0, ',', '.');
+            $desc .= " | H.Jual: " . number_format($oldJual, 0, ',', '.') . " -> " . number_format($hargaJual, 0, ',', '.') . " (Selisih: $diffStrJ)";
+        }
+
+        // 3. Record Expense (Cash Out)
         $totalAmount = $qty * $hargaBeli;
         $this->expenseModel->insert([
-            'description' => "Restok Barang: " . $product['name'] . " ($qty pcs)",
+            'description' => $desc,
             'category'    => 'Restok',
             'amount'      => $totalAmount,
             'date'        => date('Y-m-d')

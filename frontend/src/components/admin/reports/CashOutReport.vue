@@ -35,7 +35,14 @@
           </thead>
           <tbody>
             <tr v-for="exp in data.expenses" :key="exp.id">
-              <td><strong>{{ exp.description }}</strong></td>
+              <td>
+                <div class="main-desc"><strong>{{ exp.description.split('|')[0] }}</strong></div>
+                <div v-if="exp.description.includes('|')" class="price-changes">
+                   <div v-for="(line, li) in exp.description.split('|').slice(1)" :key="li" class="change-line">
+                      {{ line.trim() }}
+                   </div>
+                </div>
+              </td>
               <td>{{ new Date(exp.date).toLocaleDateString('id-ID') }}</td>
               <td class="text-right text-red">{{ formatCurrency(exp.amount) }}</td>
             </tr>
@@ -113,6 +120,10 @@ h5 { margin-bottom: 8px; font-weight: 800; color: #334155; font-size: 0.75rem; }
 .data-table td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .text-right { text-align: right; }
 .text-center { text-align: center; }
+
+.main-desc { font-size: 0.7rem; color: #1e293b; }
+.price-changes { margin-top: 4px; padding-top: 4px; border-top: 1px dotted #e2e8f0; }
+.change-line { font-size: 0.55rem; color: #6366f1; font-weight: 600; line-height: 1.3; }
 
 .loader { padding: 15px; font-size: 0.7rem; text-align: center; color: #94a3b8; }
 </style>
