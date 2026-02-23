@@ -28,37 +28,25 @@ class Email extends BaseConfig
     /**
      * SMTP Server Hostname
      */
-    public string $SMTPHost = '';
-
-    /**
-     * Which SMTP authentication method to use: login, plain
-     */
+    public string $SMTPHost = 'smtp.gmail.com';
     public string $SMTPAuthMethod = 'login';
-
-    /**
-     * SMTP Username
-     */
     public string $SMTPUser = '';
-
-    /**
-     * SMTP Password
-     */
     public string $SMTPPass = '';
-
-    /**
-     * SMTP Port
-     */
-    public int $SMTPPort = 25;
-
-    /**
-     * SMTP Timeout (in seconds)
-     */
-    public int $SMTPTimeout = 5;
-
-    /**
-     * Enable persistent SMTP connections
-     */
+    public int $SMTPPort = 587;
+    public int $SMTPTimeout = 30;
     public bool $SMTPKeepAlive = false;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->protocol = env('email.protocol', 'smtp');
+        $this->SMTPHost = env('email.SMTPHost', 'smtp.gmail.com');
+        $this->SMTPUser = env('email.SMTPUser', '');
+        $this->SMTPPass = env('email.SMTPPass', '');
+        $this->SMTPPort = (int)env('email.SMTPPort', 587);
+        $this->SMTPCrypto = env('email.SMTPCrypto', 'tls');
+        $this->mailType = env('email.mailType', 'html');
+    }
 
     /**
      * SMTP Encryption.
