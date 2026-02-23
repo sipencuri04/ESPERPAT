@@ -252,10 +252,10 @@ onMounted(fetchProduct);
 }
 
 .main-img {
-  max-width: 75%;
-  max-height: 75%;
-  object-fit: contain;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.06));
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 28px;
 }
 
 /* Info Card */
@@ -349,7 +349,7 @@ onMounted(fetchProduct);
 .divider {
   height: 1px;
   background: #f1f5f9;
-  margin: 0 0 20px;
+  margin: 0 -1.25rem 20px;
 }
 
 /* Specs Grid */

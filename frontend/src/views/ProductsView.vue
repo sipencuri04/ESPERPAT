@@ -340,9 +340,12 @@ onMounted(() => {
 }
 
 .card-img {
-  max-width: 85%;
-  max-height: 85%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  position: absolute;
+  inset: 0;
 }
 
 .top-badges {

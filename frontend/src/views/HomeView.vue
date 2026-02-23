@@ -549,10 +549,19 @@ onMounted(() => {
   opacity: 0.9;
 }
 
+.card-image {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .card-image img {
-  max-width: 80%;
-  max-height: 80%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
 }
 
 .card-info {
