@@ -106,31 +106,12 @@ const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustu
 const years = [2024, 2025, 2026];
 
 // MOBILE UX LOGIC
-const isMobile = ref(false);
 const isMobileMenuOpen = ref(true);
-
-const checkDevice = () => {
-    isMobile.value = window.innerWidth <= 900;
-    if (!isMobile.value) {
-        isMobileMenuOpen.value = true; // Always open on desktop
-    }
-};
-
-onMounted(() => {
-    checkDevice();
-    window.addEventListener('resize', checkDevice);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('resize', checkDevice);
-});
 
 const selectTab = (tabName) => {
     currentTab.value = tabName;
-    if (isMobile.value) {
-        isMobileMenuOpen.value = false; // Hide menu, show content layout
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    isMobileMenuOpen.value = false; // Hide menu, show content layout
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 </script>
 
@@ -173,19 +154,17 @@ const selectTab = (tabName) => {
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .reports-layout { flex-direction: column; padding: 15px; }
-  .reports-sidebar { width: 100%; position: static; }
-  .top-filter-bar { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
-  .info-badge { align-self: flex-start; }
+/* OVERRIDE FOR MOBILE FRAME CONTAINER */
+.reports-layout { flex-direction: column; padding: 15px; }
+.reports-sidebar { width: 100%; position: static; }
+.top-filter-bar { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
+.info-badge { align-self: flex-start; }
   
-  /* UX Toggling Mobile Pages */
-  .mobile-nav-mode .reports-sidebar { display: block; }
-  .mobile-nav-mode .reports-content { display: none; }
+/* UX Toggling Mobile Pages */
+.mobile-nav-mode .reports-sidebar { display: block; }
+.mobile-nav-mode .reports-content { display: none; }
   
-  .mobile-content-mode .reports-sidebar { display: none; }
-  .mobile-content-mode .reports-content { display: flex; }
-  .mobile-content-mode .mobile-nav-back { display: block; }
-}
+.mobile-content-mode .reports-sidebar { display: none; }
+.mobile-content-mode .reports-content { display: flex; }
+.mobile-content-mode .mobile-nav-back { display: block; }
 </style>
