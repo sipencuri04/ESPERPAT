@@ -154,7 +154,7 @@ const modules = [
   { label: 'Orders', icon: '🚚', color: 'purple', to: '/admin/orders' },
   { label: 'Category', icon: '📁', color: 'orange', to: '/admin/categories' },
   { label: 'Customer', icon: '👥', color: 'red', to: '/admin/customers' },
-  { label: 'Laporan', icon: '📊', color: 'green', to: '/admin/reports/sales' },
+  { label: 'Laporan', icon: '📊', color: 'green', to: '/admin/reports' },
   { label: 'Settings', icon: '⚙️', color: 'cyan', to: '/admin/settings' },
   { label: 'Promo', icon: '🏷️', color: 'yellow', to: '/admin/promo' },
   { label: 'Finance', icon: '💰', color: 'emerald', to: '/admin/finance' },
@@ -180,9 +180,9 @@ const fetchDashboardData = async () => {
         }
         
         // Fetch Stock (To count low stock)
-        const stockRes = await client.get('reports/stock');
-        if(stockRes.data?.data?.products) {
-            stats.value.lowStock = stockRes.data.data.products.filter(p => p.stock <= 5).length;
+        const stockRes = await client.get('reports/advanced/inventory');
+        if(stockRes.data?.data?.low_stock) {
+            stats.value.lowStock = stockRes.data.data.low_stock.length;
         }
     } catch (e) {
         console.error('Failed to fetch dashboard data', e);

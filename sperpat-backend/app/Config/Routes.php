@@ -132,7 +132,28 @@ $routes->group('api', function ($routes) {
             $routes->get('orders', 'Api\OrderController::index');
             $routes->put('orders/(:num)/status', 'Api\OrderController::updateStatus/$1');
 
-            // Reports
+            // Advanced Reports (ERP)
+            $routes->group('reports/advanced', function ($routes) {
+                $routes->get('laba-rugi', 'Api\AdvancedReportController::labaRugi');
+                $routes->get('cash-flow', 'Api\AdvancedReportController::cashFlow');
+                $routes->get('neraca', 'Api\AdvancedReportController::neraca');
+                $routes->get('sales', 'Api\AdvancedReportController::salesReport');
+                $routes->get('inventory', 'Api\AdvancedReportController::inventoryReport');
+                $routes->get('inventory-analytics', 'Api\AdvancedReportController::inventoryAnalytics');
+                $routes->get('aging-piutang', 'Api\AdvancedReportController::agingPiutang');
+                $routes->get('aging-hutang', 'Api\AdvancedReportController::agingHutang');
+            });
+            $routes->get('migrate-erp', function() {
+                try {
+                    $migrate = \Config\Services::migrations();
+                    $migrate->latest();
+                    return 'Databases and Tables Migrated Successfully';
+                } catch (\Throwable $e) {
+                    return $e->getMessage();
+                }
+            });
+
+            // Reports (Legacy)
             $routes->get('reports/profit', 'Api\ReportController::profit');
             $routes->get('reports/sales', 'Api\ReportController::sales');
             $routes->get('reports/stock', 'Api\ReportController::stock');

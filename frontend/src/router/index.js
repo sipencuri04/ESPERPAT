@@ -82,14 +82,9 @@ const routes = [
                 component: () => import('../views/admin/CustomersView.vue'),
             },
             {
-                path: 'reports/sales', // Changed path for existing reports
+                path: 'reports',
                 name: 'admin-reports',
                 component: () => import('../views/admin/ReportsView.vue'),
-            },
-            {
-                path: 'reports/stock', // Added new stock report route
-                name: 'admin-reports-stock',
-                component: () => import('../views/admin/StockReportView.vue'),
             },
             {
                 path: 'finance',
