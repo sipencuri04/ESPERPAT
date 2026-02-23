@@ -88,40 +88,43 @@ onMounted(loadData);
 </script>
 
 <style scoped>
-/* COMPACT UI FOR MOBILE APP */
-.report-panel { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
-.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.panel-header h4 { font-weight: 800; font-size: 0.95rem; color: #111; }
-.actions { display: flex; gap: 8px; }
-.btn-export { padding: 6px 12px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; border: none; cursor: pointer; }
+/* ULTRA COMPACT UI FOR MOBILE APP */
+.report-panel { background: white; border-radius: 12px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); overflow: hidden; }
+.panel-header { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.panel-header h4 { font-weight: 800; font-size: 0.85rem; color: #111; margin: 0; }
+.actions { display: flex; gap: 5px; }
+.btn-export { flex: 1; padding: 5px 10px; border-radius: 8px; font-weight: 700; font-size: 0.65rem; border: none; cursor: pointer; text-align: center; }
 .btn-export.pdf { background: #fee2e2; color: #ef4444; }
 .btn-export.excel { background: #dcfce7; color: #22c55e; }
 
-.summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.card { padding: 12px; border-radius: 15px; background: #f8fafc; border: 1px solid #f1f5f9; }
+/* Horizontal scrolling cards to prevent squashing */
+.summary-cards { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; -ms-overflow-style: none; }
+.summary-cards::-webkit-scrollbar { display: none; }
+
+.card { flex: 0 0 120px; padding: 10px; border-radius: 12px; background: #f8fafc; border: 1px solid #f1f5f9; }
 .card.primary { background: #111; color: white; border: none; }
-.card span { font-size: 0.6rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; }
+.card span { font-size: 0.55rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card.primary span { color: #94a3b8; }
-.card h3 { font-size: 1rem; font-weight: 900; margin: 4px 0; color: #0f172a; word-break: break-all; }
+.card h3 { font-size: 0.85rem; font-weight: 900; margin: 2px 0; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card.primary h3 { color: white; }
-.card small { font-size: 0.65rem; display: block; }
+.card small { font-size: 0.55rem; display: block; line-height: 1.1; margin-top: 2px; }
 .card small.green { color: #10b981; font-weight: 600; }
 .card small.text-muted { color: #94a3b8; }
 .card small.text-purple { color: #a78bfa; font-weight: 600; }
 
-.mt-4 { margin-top: 20px; }
-h5 { margin-bottom: 10px; font-weight: 800; color: #334155; font-size: 0.85rem; }
-.table-container { border: 1px solid #e2e8f0; border-radius: 12px; overflow: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-.data-table th { background: #f8fafc; text-align: left; padding: 8px 12px; font-size: 0.65rem; text-transform: uppercase; color: #475569; border-bottom: 1px solid #cbd5e1; }
-.data-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+.mt-4 { margin-top: 15px; }
+h5 { margin-bottom: 8px; font-weight: 800; color: #334155; font-size: 0.75rem; }
+.table-container { border: 1px solid #e2e8f0; border-radius: 10px; overflow-x: auto; background: white; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.65rem; table-layout: fixed; }
+.data-table th { background: #f8fafc; text-align: left; padding: 6px 8px; font-size: 0.55rem; text-transform: uppercase; color: #475569; border-bottom: 1px solid #cbd5e1; }
+.data-table td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .text-right { text-align: right; }
 .text-center { text-align: center; }
 
-.badge { padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; background: #e2e8f0; color: #64748b; }
+.badge { padding: 1px 4px; border-radius: 3px; font-size: 0.55rem; font-weight: 800; display: inline-block; }
 .badge.paid { background: #dcfce7; color: #166534; }
 .badge.shipped { background: #fdf4ff; color: #86198f; }
 .badge.completed { background: #dbeafe; color: #1e40af; }
 
-.loader { padding: 20px; font-size: 0.8rem; text-align: center; color: #94a3b8; font-weight: 600; }
+.loader { padding: 15px; font-size: 0.7rem; text-align: center; color: #94a3b8; }
 </style>
