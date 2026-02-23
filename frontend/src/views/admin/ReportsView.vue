@@ -13,23 +13,9 @@
 
         <nav class="report-nav">
           <div class="nav-group">
-            <span class="group-title">FINANCIALS</span>
-            <button class="nav-btn" :class="{ active: currentTab === 'LabaRugi' }" @click="selectTab('LabaRugi')">Laba Rugi</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'CashFlow' }" @click="selectTab('CashFlow')">Cash Flow</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'Neraca' }" @click="selectTab('Neraca')">Neraca</button>
-          </div>
-          
-          <div class="nav-group">
-            <span class="group-title">SALES & INVENTORY</span>
-            <button class="nav-btn" :class="{ active: currentTab === 'SalesReport' }" @click="selectTab('SalesReport')">Sales Report</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'InventoryReport' }" @click="selectTab('InventoryReport')">Inventory Report</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'InventoryAnalytics' }" @click="selectTab('InventoryAnalytics')">Inventory Analytics</button>
-          </div>
-
-          <div class="nav-group">
-            <span class="group-title">PAYABLES & RECEIVABLES</span>
-            <button class="nav-btn" :class="{ active: currentTab === 'AgingPiutang' }" @click="selectTab('AgingPiutang')">Aging Piutang</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'AgingHutang' }" @click="selectTab('AgingHutang')">Aging Hutang</button>
+            <span class="group-title">LAPORAN DASAR</span>
+            <button class="nav-btn" :class="{ active: currentTab === 'SalesReport' }" @click="selectTab('SalesReport')">Laporan Penjualan</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'InventoryReport' }" @click="selectTab('InventoryReport')">Stok Barang</button>
           </div>
         </nav>
       </aside>
@@ -79,21 +65,15 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 
-// Import all sub-components
-import LabaRugi from '@/components/admin/reports/LabaRugi.vue';
-import CashFlow from '@/components/admin/reports/CashFlow.vue';
-import Neraca from '@/components/admin/reports/Neraca.vue';
+// Import basic sub-components
 import SalesReport from '@/components/admin/reports/SalesReport.vue';
 import InventoryReport from '@/components/admin/reports/InventoryReport.vue';
-import InventoryAnalytics from '@/components/admin/reports/InventoryAnalytics.vue';
-import AgingPiutang from '@/components/admin/reports/AgingPiutang.vue';
-import AgingHutang from '@/components/admin/reports/AgingHutang.vue';
 
 const componentsMap = {
-  LabaRugi, CashFlow, Neraca, SalesReport, InventoryReport, InventoryAnalytics, AgingPiutang, AgingHutang
+  SalesReport, InventoryReport
 };
 
-const currentTab = ref('LabaRugi');
+const currentTab = ref('SalesReport');
 const activeComponent = computed(() => componentsMap[currentTab.value]);
 
 const filter = ref({
