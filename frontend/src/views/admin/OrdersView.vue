@@ -84,7 +84,7 @@
             
             <div class="drawer-header">
               <div class="inv-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               </div>
               <div class="header-text">
                 <h3>{{ selectedOrder.invoice_number }}</h3>
@@ -335,10 +335,10 @@ onMounted(fetchOrders);
 /* Stats */
 .order-stats { display: flex; gap: 12px; padding: 0 1.5rem; margin-bottom: 25px; }
 .stat-card { flex: 1; background: #fff7ed; padding: 15px; border-radius: 20px; border: 1px solid #ffedd5; text-align: center; }
-.stat-card.blue { background: #eff6ff; border-color: #dbeafe; }
+.stat-card.blue { background: #f5f3ff; border-color: #ede9fe; }
 .stat-card.green { background: #f0fdf4; border-color: #dcfce7; }
 .stat-card .num { display: block; font-size: 1.2rem; font-weight: 900; color: #f97316; }
-.stat-card.blue .num { color: #3b82f6; }
+.stat-card.blue .num { color: #8b5cf6; }
 .stat-card.green .num { color: #22c55e; }
 .stat-card .lbl { font-size: 0.7rem; font-weight: 700; color: #999; text-transform: uppercase; }
 
@@ -360,12 +360,12 @@ onMounted(fetchOrders);
 
 .price-box { text-align: right; }
 .total-label { display: block; font-size: 0.65rem; color: #bbb; font-weight: 700; text-transform: uppercase; }
-.total-val { font-size: 1rem; font-weight: 900; color: #3b82f6; }
+.total-val { font-size: 1rem; font-weight: 900; color: #8b5cf6; }
 
 .card-status-row { display: flex; justify-content: space-between; align-items: center; }
 .status-pill { font-size: 0.6rem; font-weight: 900; padding: 4px 10px; border-radius: 8px; letter-spacing: 0.5px; }
 .status-pill.pending { background: #fff7ed; color: #f97316; }
-.status-pill.paid { background: #eff6ff; color: #3b82f6; }
+.status-pill.paid { background: #f5f3ff; color: #8b5cf6; }
 .status-pill.shipped { background: #fdf4ff; color: #a855f7; }
 .status-pill.completed { background: #f0fdf4; color: #22c55e; }
 .status-pill.cancelled { background: #fef2f2; color: #ef4444; }
@@ -376,7 +376,7 @@ onMounted(fetchOrders);
 .drawer-handle { width: 40px; height: 5px; background: #eee; border-radius: 5px; margin: 0 auto 1.5rem; }
 
 .drawer-header { display: flex; gap: 15px; align-items: center; margin-bottom: 2rem; }
-.inv-circle { width: 50px; height: 50px; background: #eff6ff; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.inv-circle { width: 50px; height: 50px; background: #f5f3ff; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
 .header-text h3 { font-size: 1.1rem; font-weight: 900; }
 .header-text p { font-size: 0.75rem; color: #999; font-weight: 600; }
 
@@ -384,7 +384,7 @@ onMounted(fetchOrders);
 .item-mini-list { background: #f8f9fa; border-radius: 18px; padding: 15px; margin-bottom: 15px; }
 .item-row { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; font-size: 0.85rem; margin-bottom: 8px; }
 .item-row:last-child { margin-bottom: 0; }
-.item-row .qty { font-weight: 800; color: #3b82f6; }
+.item-row .qty { font-weight: 800; color: #8b5cf6; }
 .item-row .name { color: #444; font-weight: 600; }
 .item-row .price { font-weight: 700; color: #111; }
 
@@ -395,19 +395,19 @@ onMounted(fetchOrders);
 .info-section { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
 .info-group .lbl { font-size: 0.7rem; font-weight: 700; color: #bbb; text-transform: uppercase; display: block; margin-bottom: 4px; }
 .info-group .val { font-size: 0.85rem; font-weight: 700; color: #333; line-height: 1.4; }
-.resi-text { color: #3b82f6 !important; }
+.resi-text { color: #8b5cf6 !important; }
 
 .drawer-actions { display: flex; flex-direction: column; gap: 10px; }
-.btn-primary { width: 100%; height: 56px; border-radius: 18px; border: none; background: #3b82f6; color: white; font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: 0 10px 20px rgba(59,130,246,0.3); }
-.btn-outline { width: 100%; height: 56px; border-radius: 18px; border: 2px solid #3b82f6; background: transparent; color: #3b82f6; font-weight: 900; cursor: pointer; }
+.btn-primary { width: 100%; height: 56px; border-radius: 18px; border: none; background: #8b5cf6; color: white; font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: 0 10px 20px rgba(139,92,246,0.3); }
+.btn-outline { width: 100%; height: 56px; border-radius: 18px; border: 2px solid #8b5cf6; background: transparent; color: #8b5cf6; font-weight: 900; cursor: pointer; }
 .btn-danger { width: 100%; height: 50px; border-radius: 18px; border: none; background: #fff1f2; color: #ef4444; font-weight: 800; font-size: 0.9rem; cursor: pointer; }
 
 .ship-action { display: flex; flex-direction: column; gap: 10px; }
 .resi-input { width: 100%; height: 50px; border-radius: 14px; border: 1px solid #eee; padding: 0 15px; font-family: inherit; font-weight: 700; outline: none; background: #f9f9f9; }
-.resi-input:focus { border-color: #3b82f6; background: white; }
+.resi-input:focus { border-color: #8b5cf6; background: white; }
 
 .loader { padding: 50px; text-align: center; }
-.spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 10px; }
+.spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #8b5cf6; border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 10px; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .empty-state { text-align: center; padding: 60px; color: #bbb; font-weight: 700; }
 

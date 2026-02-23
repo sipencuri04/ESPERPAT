@@ -221,7 +221,7 @@ onMounted(fetchCoreData);
 /* Ticket/Coupon UI */
 .promo-card { background: white; border-radius: 20px; display: flex; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.03)); position: relative; border: 1px solid #f3f3f3; }
 .promo-card.disc { border-left: 5px solid #ef4444; }
-.promo-card.shipping { border-left: 5px solid #3b82f6; } /* Used for fixed nominal currently */
+.promo-card.shipping { border-left: 5px solid #8b5cf6; } /* Used for fixed nominal currently */
 
 .card-side { width: 12px; position: relative; background: #fdfdfd; }
 .cutout { position: absolute; width: 22px; height: 22px; background: #fdfdfd; border: 1px solid #f3f3f3; border-radius: 50%; left: -11px; }

@@ -179,7 +179,7 @@ onMounted(fetchCustomers);
 .minimal-card:active { transform: scale(0.98); background: #f9f9f9; }
 .card-inner { display: flex; align-items: center; gap: 15px; }
 
-.user-avatar { width: 44px; height: 44px; background: #eff6ff; color: #3b82f6; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.9rem; flex-shrink: 0; }
+.user-avatar { width: 44px; height: 44px; background: #f5f3ff; color: #8b5cf6; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.9rem; flex-shrink: 0; }
 .user-avatar.inactive { background: #f1f1f1; color: #aaa; }
 
 .user-info { flex: 1; }
@@ -195,10 +195,10 @@ onMounted(fetchCustomers);
 .drawer-handle { width: 40px; height: 5px; background: #eee; border-radius: 5px; margin: 0 auto 1.5rem; }
 
 .drawer-header { display: flex; gap: 20px; align-items: center; margin-bottom: 2rem; }
-.avatar-large { width: 70px; height: 70px; background: #eff6ff; color: #3b82f6; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; }
+.avatar-large { width: 70px; height: 70px; background: #f5f3ff; color: #8b5cf6; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; }
 .avatar-large.inactive { background: #f1f1f1; color: #aaa; }
 .header-info h3 { font-size: 1.3rem; font-weight: 900; line-height: 1.2; }
-.role-tag { font-size: 0.65rem; font-weight: 900; color: #3b82f6; background: #eff6ff; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
+.role-tag { font-size: 0.65rem; font-weight: 900; color: #8b5cf6; background: #f5f3ff; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
 
 .info-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
 .info-box { padding: 15px; background: #f8f9fa; border-radius: 18px; }
@@ -214,7 +214,7 @@ onMounted(fetchCustomers);
 .btn-action.wa { background: #111; color: white; }
 
 .loader { padding: 50px; text-align: center; }
-.spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 10px; }
+.spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #8b5cf6; border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 10px; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 .slide-up-enter-active, .slide-up-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }

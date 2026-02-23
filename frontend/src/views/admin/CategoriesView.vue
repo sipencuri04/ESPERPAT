@@ -26,7 +26,7 @@
         <div v-else v-for="cat in categories" :key="cat.id" class="minimal-card" @click="openEditDrawer(cat)">
           <div class="card-inner">
             <div class="cat-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
             </div>
             <div class="cat-info">
               <h4 class="cat-name">{{ cat.name }}</h4>
@@ -180,14 +180,14 @@ onMounted(fetchCategories);
 .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; position: sticky; top: 0; z-index: 10; background: #fdfdfd; }
 .top-bar .title { font-weight: 800; font-size: 1.2rem; }
 .back-btn { background: none; border: none; cursor: pointer; }
-.add-btn { background: #3b82f6; color: white; width: 44px; height: 44px; border-radius: 14px; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(59,130,246,0.3); }
+.add-btn { background: #8b5cf6; color: white; width: 44px; height: 44px; border-radius: 14px; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(139,92,246,0.3); }
 
 /* List */
 .category-list { padding: 0 1.5rem 100px; display: flex; flex-direction: column; gap: 10px; }
 .minimal-card { background: white; border-radius: 20px; padding: 18px; border: 1px solid #f3f3f3; transition: transform 0.2s; cursor: pointer; }
 .minimal-card:active { transform: scale(0.98); background: #f9f9f9; }
 .card-inner { display: flex; align-items: center; gap: 18px; }
-.cat-icon { width: 44px; height: 44px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.cat-icon { width: 44px; height: 44px; background: #f5f3ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 .cat-info { flex: 1; }
 .cat-name { font-size: 0.95rem; font-weight: 800; color: #111; margin-bottom: 2px; }
 .cat-count { font-size: 0.7rem; color: #999; font-weight: 600; }
@@ -215,12 +215,12 @@ onMounted(fetchCategories);
 .cat-form .form-group { margin-bottom: 1.2rem; }
 .form-group label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; }
 .form-group input, .form-group textarea { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #eee; background: #f9f9f9; font-family: inherit; font-weight: 600; outline: none; }
-.form-group input:focus { border-color: #3b82f6; background: white; }
+.form-group input:focus { border-color: #8b5cf6; background: white; }
 
-.submit-btn { width: 100%; height: 56px; background: #3b82f6; color: white; border: none; border-radius: 18px; font-weight: 800; margin-top: 1rem; cursor: pointer; }
+.submit-btn { width: 100%; height: 56px; background: #8b5cf6; color: white; border: none; border-radius: 18px; font-weight: 800; margin-top: 1rem; cursor: pointer; }
 
 .loader { padding: 50px; text-align: center; }
-.spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 10px; }
+.spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #8b5cf6; border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 10px; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .empty-state { text-align: center; padding: 60px; color: #bbb; font-weight: 700; }
 

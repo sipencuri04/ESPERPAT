@@ -60,7 +60,7 @@
             <button class="check-btn" @click="$router.push('/admin/products')">Manage Stock</button>
           </div>
           <div class="card-img">
-            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
           </div>
         </section>
 
@@ -207,9 +207,9 @@ onMounted(fetchDashboardData);
   background: #fdfdfd;
 }
 
-/* Header Section with Blue Gradient */
+/* Header Section with Purple Gradient */
 .header-section {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
   padding: 2.5rem 1.5rem 4.5rem;
   border-bottom-left-radius: 35px;
   border-bottom-right-radius: 35px;
@@ -258,7 +258,7 @@ onMounted(fetchDashboardData);
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 2px solid #3b82f6;
+  border: 2px solid #8b5cf6;
   animation: pulse-badge 2s infinite;
 }
 
@@ -296,7 +296,7 @@ onMounted(fetchDashboardData);
 }
 
 .filter-btn {
-  background: #3b82f6;
+  background: #8b5cf6;
   color: white;
   border: none;
   width: 36px;
@@ -333,7 +333,7 @@ onMounted(fetchDashboardData);
 
 /* Hero Card Compact */
 .hero-card {
-  background: #eff6ff;
+  background: #f5f3ff;
   border-radius: 24px;
   padding: 20px;
   display: flex;
@@ -342,11 +342,11 @@ onMounted(fetchDashboardData);
 }
 
 .card-content { flex: 1.5; }
-.card-content h3 { font-size: 1rem; font-weight: 800; color: #1e3a8a; margin-bottom: 4px; }
-.card-content p { font-size: 0.8rem; color: #1e40af; line-height: 1.4; margin-bottom: 12px; }
+.card-content h3 { font-size: 1rem; font-weight: 800; color: #4c1d95; margin-bottom: 4px; }
+.card-content p { font-size: 0.8rem; color: #5b21b6; line-height: 1.4; margin-bottom: 12px; }
 
 .check-btn {
-  background: #3b82f6;
+  background: #8b5cf6;
   color: white;
   border: none;
   padding: 6px 16px;
@@ -376,7 +376,7 @@ onMounted(fetchDashboardData);
 }
 
 .card-header h4 { font-weight: 800; color: #111; font-size: 0.95rem; }
-.see-all { font-size: 0.8rem; color: #3b82f6; text-decoration: none; font-weight: 700; }
+.see-all { font-size: 0.8rem; color: #8b5cf6; text-decoration: none; font-weight: 700; }
 
 .modules-grid {
   display: grid;
@@ -407,7 +407,7 @@ onMounted(fetchDashboardData);
 .module-item span { font-size: 0.7rem; font-weight: 700; color: #666; text-align: center; }
 
 /* Colors */
-.blue { color: #3b82f6; }
+.blue { color: #8b5cf6; }
 .purple { color: #8b5cf6; }
 .orange { color: #f59e0b; }
 .red { color: #ef4444; }
@@ -437,7 +437,7 @@ onMounted(fetchDashboardData);
 
 .ord-price { text-align: right; }
 .ord-price .status { display: block; font-size: 0.6rem; font-weight: 800; margin-bottom: 2px; text-transform: uppercase; }
-.status.new { color: #3b82f6; }
+.status.new { color: #8b5cf6; }
 .status.process { color: #f59e0b; }
 .status.sent { color: #22c55e; }
 .ord-price strong { font-size: 0.85rem; color: #111; font-weight: 800; }
@@ -471,5 +471,5 @@ onMounted(fetchDashboardData);
 }
 
 .nav-btn span { font-size: 0.65rem; font-weight: 700; }
-.nav-btn.active { color: #3b82f6; }
+.nav-btn.active { color: #8b5cf6; }
 </style>

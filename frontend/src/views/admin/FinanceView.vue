@@ -230,8 +230,8 @@ const renderCharts = () => {
             datasets: [{
                label: 'Sales',
                data: dailyData.value.map(d => d.sales),
-               borderColor: '#3b82f6',
-               backgroundColor: 'rgba(59,130,246,0.1)',
+               borderColor: '#8b5cf6',
+               backgroundColor: 'rgba(139,92,246,0.1)',
                fill: true,
                tension: 0.4,
                pointRadius: 0
@@ -368,9 +368,9 @@ onMounted(fetchAll);
 .target-section { margin-bottom: 25px; }
 .target-head { display: flex; justify-content: space-between; margin-bottom: 8px; }
 .t-lbl { font-size: 0.65rem; font-weight: 800; color: #999; text-transform: uppercase; }
-.t-pct { font-size: 0.7rem; font-weight: 900; color: #3b82f6; }
+.t-pct { font-size: 0.7rem; font-weight: 900; color: #8b5cf6; }
 .progress-track { width: 100%; height: 8px; background: #f1f1f1; border-radius: 4px; overflow: hidden; }
-.progress-fill { height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.5s ease; }
+.progress-fill { height: 100%; background: #8b5cf6; border-radius: 4px; transition: width 0.5s ease; }
 
 .bal-footer { display: flex; gap: 30px; border-top: 1px solid #f9f9f9; padding-top: 15px; }
 .f-item .f-lbl { display: block; font-size: 0.6rem; color: #bbb; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
@@ -400,17 +400,17 @@ onMounted(fetchAll);
 .tx-inv { display: block; font-size: 0.85rem; font-weight: 800; color: #111; }
 .tx-meta { display: flex; align-items: center; gap: 4px; }
 .tx-date { font-size: 0.65rem; color: #bbb; font-weight: 600; }
-.tx-resi { font-size: 0.65rem; color: #3b82f6; font-weight: 700; }
+.tx-resi { font-size: 0.65rem; color: #8b5cf6; font-weight: 700; }
 
 .tx-amount { text-align: right; margin-right: 10px; }
 .tx-val { display: block; font-size: 0.9rem; font-weight: 900; color: #22c55e; }
 .tx-status { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
-.tx-status.paid { background: #eff6ff; color: #3b82f6; }
+.tx-status.paid { background: #f5f3ff; color: #8b5cf6; }
 .tx-status.shipped { background: #fdf4ff; color: #a855f7; }
 .tx-status.completed { background: #f0fdf4; color: #22c55e; }
 
 .tx-toggle { transition: 0.3s; color: #ccc; }
-.tx-toggle.rotated { transform: rotate(180deg); color: #3b82f6; }
+.tx-toggle.rotated { transform: rotate(180deg); color: #8b5cf6; }
 
 /* Expanded Details */
 .tx-details { padding: 15px; background: #f9f9f9; border-top: 1px solid #f1f1f1; animation: slideDown 0.3s ease-out; }

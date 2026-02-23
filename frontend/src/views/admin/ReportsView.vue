@@ -140,7 +140,7 @@ onMounted(fetchData);
 .chart-mock { margin-top: 30px; }
 .bar-container { height: 120px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding: 0 10px; }
 .bar-wrap { flex: 1; height: 100%; display: flex; align-items: flex-end; }
-.bar { width: 100%; border-top-left-radius: 8px; border-top-right-radius: 8px; background: linear-gradient(to top, #3b82f6, #60a5fa); min-height: 5px; opacity: 0.8; transition: opacity 0.3s; }
+.bar { width: 100%; border-top-left-radius: 8px; border-top-right-radius: 8px; background: linear-gradient(to top, #8b5cf6, #a78bfa); min-height: 5px; opacity: 0.8; transition: opacity 0.3s; }
 .bar:hover { opacity: 1; }
 .chart-labels { display: flex; justify-content: space-between; margin-top: 15px; padding: 0 5px; }
 .chart-labels span { font-size: 0.6rem; font-weight: 700; color: #666; }
@@ -148,7 +148,7 @@ onMounted(fetchData);
 .top-products { padding: 0 1.5rem; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .section-header h4 { font-weight: 800; }
-.txt-btn { background: none; border: none; font-size: 0.75rem; font-weight: 700; color: #3b82f6; }
+.txt-btn { background: none; border: none; font-size: 0.75rem; font-weight: 700; color: #8b5cf6; }
 
 .product-list-mini { display: flex; flex-direction: column; gap: 10px; }
 .prod-row { background: white; padding: 15px; border-radius: 20px; border: 1px solid #f1f1f1; display: flex; align-items: center; gap: 15px; }

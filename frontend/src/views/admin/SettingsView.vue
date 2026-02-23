@@ -204,7 +204,7 @@ const handleLogout = () => {
 .setting-item:active { background: #f9f9f9; transform: scale(0.98); }
 
 .icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.icon-box.blue { background: #eff6ff; color: #3b82f6; }
+.icon-box.blue { background: #f5f3ff; color: #8b5cf6; }
 .icon-box.green { background: #f0fdf4; color: #22c55e; }
 .icon-box.orange { background: #fff7ed; color: #f97316; }
 .icon-box.red { background: #fef2f2; color: #ef4444; }
@@ -216,7 +216,7 @@ const handleLogout = () => {
 
 .toggle-btn { width: 44px; height: 24px; background: #e2e8f0; border-radius: 999px; position: relative; transition: 0.3s; flex-shrink: 0; }
 .toggle-btn::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.toggle-btn.active { background: #3b82f6; }
+.toggle-btn.active { background: #8b5cf6; }
 .toggle-btn.active::after { left: 22px; }
 
 .settings-footer { text-align: center; margin-top: 40px; padding: 0 1.5rem; }
@@ -233,8 +233,8 @@ const handleLogout = () => {
 .edit-form .form-group { margin-bottom: 1.5rem; }
 .edit-form label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: #333; }
 .edit-form input, .edit-form textarea { width: 100%; padding: 16px; border-radius: 16px; border: 1.5px solid #e2e8f0; background: #f8fafc; font-family: inherit; font-weight: 600; font-size: 0.95rem; outline: none; transition: border 0.2s; }
-.edit-form input:focus, .edit-form textarea:focus { border-color: #3b82f6; background: white; }
-.save-btn { width: 100%; height: 56px; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; border: none; border-radius: 18px; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 8px 25px rgba(59,130,246,0.3); }
+.edit-form input:focus, .edit-form textarea:focus { border-color: #8b5cf6; background: white; }
+.save-btn { width: 100%; height: 56px; background: linear-gradient(135deg, #a855f7, #6366f1); color: white; border: none; border-radius: 18px; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 8px 25px rgba(139,92,246,0.3); }
 .save-btn:active { transform: scale(0.98); }
 
 .slide-up-enter-active, .slide-up-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
