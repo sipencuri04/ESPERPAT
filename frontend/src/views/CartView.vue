@@ -233,15 +233,22 @@ const confirmOrder = async () => {
                 qty: it.qty
             })),
             promo_code: appliedPromoCode.value || null,
-            alamat: 'Tegalsari, Surabaya', // Dummy for now, can be expanded
+            alamat: 'Tegalsari, Surabaya',
             metode_pembayaran: 'transfer'
         };
 
-        await client.post('orders', orderData);
+        const res = await client.post('orders', orderData);
+        const newOrderId = res.data?.data?.id;
         
-        // Success
-        cartStore.clearCart(); // Clear cart globally including storage
-        isSuccessOpen.value = true;
+        // Clear cart
+        cartStore.clearCart();
+        
+        // Redirect to History with auto-pay
+        if (newOrderId) {
+            router.push({ path: '/orders', query: { pay: newOrderId } });
+        } else {
+            router.push('/orders');
+        }
     } catch (err) {
         toast.error(err.response?.data?.message || 'Gagal membuat pesanan.');
     } finally {
@@ -251,7 +258,7 @@ const confirmOrder = async () => {
 
 const finishCheckout = () => {
     isSuccessOpen.value = false;
-    router.push('/admin/orders'); // Assuming customers go to orders list (fix if there is a separate customer view)
+    router.push('/orders');
 };
 </script>
 

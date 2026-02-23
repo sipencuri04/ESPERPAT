@@ -243,13 +243,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../../stores/auth';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import client from '../../api/client';
 import { useToast } from '../../composables/useToast';
 const toast = useToast();
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
 const user = ref({
   name: 'User',
@@ -280,6 +281,20 @@ onMounted(async () => {
   };
 
   await fetchOrders();
+
+  // Auto-open payment modal if redirected from checkout
+  const autoPayId = route.query.pay;
+  if (autoPayId) {
+    await openOrderDetail(autoPayId);
+    // Wait a bit for modal to render, then open pay modal
+    setTimeout(() => {
+      if (selectedOrder.value && selectedOrder.value.status === 'pending') {
+        openPayModal();
+      }
+    }, 400);
+    // Clean the URL query
+    router.replace({ path: '/orders' });
+  }
 });
 
 const fetchOrders = async () => {
