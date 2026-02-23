@@ -321,10 +321,12 @@ class AdvancedReportController extends BaseApiController
     public function exportSales($type = 'pdf')
     {
         list($startDate, $endDate) = $this->getDateRange();
-        $orders = $this->orderModel->where('DATE(created_at) >=', $startDate)
-                                  ->where('DATE(created_at) <=', $endDate)
-                                  ->whereNotIn('status', ['pending', 'cancelled'])
-                                  ->orderBy('created_at', 'DESC')
+        $orders = $this->orderModel->select('orders.*, users.name as customer_name')
+                                  ->join('users', 'users.id = orders.user_id', 'left')
+                                  ->where('DATE(orders.created_at) >=', $startDate)
+                                  ->where('DATE(orders.created_at) <=', $endDate)
+                                  ->whereNotIn('orders.status', ['pending', 'cancelled'])
+                                  ->orderBy('orders.created_at', 'DESC')
                                   ->findAll();
         
         $totalOmzet = array_sum(array_column($orders, 'total'));
@@ -338,18 +340,28 @@ class AdvancedReportController extends BaseApiController
             
             $headers = ['No', 'Invoice', 'Customer', 'Tanggal', 'Status', 'Total'];
             $col = 'A';
-            foreach ($headers as $h) { $sheet->setCellValue($col . '4', $h); $col++; }
+            foreach ($headers as $h) { 
+                $sheet->setCellValue($col . '4', $h); 
+                $sheet->getStyle($col . '4')->getFont()->setBold(true);
+                $col++; 
+            }
 
             $row = 5; $no = 1;
             foreach ($orders as $o) {
                 $sheet->setCellValue('A' . $row, $no++);
                 $sheet->setCellValue('B' . $row, $o['invoice_number']);
-                $sheet->setCellValue('C' . $row, 'Pelanggan');
-                $sheet->setCellValue('D' . $row, $o['created_at']);
+                $sheet->setCellValue('C' . $row, $o['customer_name'] ?? 'Pelanggan');
+                $sheet->setCellValue('D' . $row, date('d/m/Y H:i', strtotime($o['created_at'])));
                 $sheet->setCellValue('E' . $row, strtoupper($o['status']));
                 $sheet->setCellValue('F' . $row, $o['total']);
+                $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0');
                 $row++;
             }
+            
+            $sheet->setCellValue('E' . $row, 'TOTAL OMZET');
+            $sheet->setCellValue('F' . $row, $totalOmzet);
+            $sheet->getStyle('E' . $row.':F'.$row)->getFont()->setBold(true);
+            $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0');
 
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
@@ -357,41 +369,112 @@ class AdvancedReportController extends BaseApiController
             $writer->save('php://output');
             exit;
         } else {
-            $html = '<h2>LAPORAN PENJUALAN</h2>';
-            $options = new Options(); $options->set('isHtml5ParserEnabled', true);
+            $html = '<style>body{font-family:sans-serif;font-size:12px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#eee;}</style>';
+            $html .= '<h2>LAPORAN PENJUALAN ESPERPAT</h2>';
+            $html .= '<p>Periode: '.$startDate.' s/d '.$endDate.'</p>';
+            $html .= '<table>';
+            $html .= '<thead><tr><th>No</th><th>Invoice</th><th>Customer</th><th>Tanggal</th><th>Status</th><th style="text-align:right">Total</th></tr></thead>';
+            $html .= '<tbody>';
+            $no = 1;
+            foreach ($orders as $o) {
+                $html .= '<tr>';
+                $html .= '<td>'.$no++.'</td>';
+                $html .= '<td>'.$o['invoice_number'].'</td>';
+                $html .= '<td>'.($o['customer_name'] ?? 'Pelanggan').'</td>';
+                $html .= '<td>'.date('d/m/Y', strtotime($o['created_at'])).'</td>';
+                $html .= '<td>'.strtoupper($o['status']).'</td>';
+                $html .= '<td style="text-align:right">Rp '.number_format($o['total'], 0, ',', '.').'</td>';
+                $html .= '</tr>';
+            }
+            $html .= '<tr style="font-weight:bold; background:#f9f9f9;"><td colspan="5" style="text-align:right">TOTAL OMZET</td><td style="text-align:right">Rp '.number_format($totalOmzet, 0, ',', '.').'</td></tr>';
+            $html .= '</tbody></table>';
+
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
             $dompdf = new Dompdf($options);
-            $dompdf->loadHtml($html); $dompdf->setPaper('A4', 'portrait'); $dompdf->render();
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
             $dompdf->stream($filename . ".pdf", ["Attachment" => true]);
             exit;
         }
     }
     public function exportInventory($type = 'pdf')
     {
-        $products = $this->productModel->join('categories', 'categories.id = products.category_id', 'left')
-                                       ->select('products.*, categories.name as category_name')
+        $products = $this->productModel->select('products.*, categories.name as category_name')
+                                       ->join('categories', 'categories.id = products.category_id', 'left')
                                        ->findAll();
+        
+        $totalValue = 0;
+        foreach ($products as $p) {
+            $totalValue += ($p['stok'] * $p['harga_beli']);
+        }
+
         $filename = "Laporan_Stok_Barang_" . date('Ymd_His');
 
         if ($type === 'excel') {
-            $spreadsheet = new Spreadsheet(); $sheet = $spreadsheet->getActiveSheet();
-            $sheet->setCellValue('A1', 'LAPORAN STOK BARANG');
-            $headers = ['No', 'Nama Produk', 'Stok', 'Harga Beli'];
-            $col = 'A'; foreach ($headers as $h) { $sheet->setCellValue($col . '3', $h); $col++; }
-            $row = 4; $no = 1;
+            $spreadsheet = new Spreadsheet(); 
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A1', 'LAPORAN STOK BARANG ESPERPAT');
+            $sheet->setCellValue('A2', 'Dicetak pada: ' . date('d/m/Y H:i'));
+            
+            $headers = ['No', 'Nama Produk', 'Kategori', 'Stok', 'Harga Beli', 'Total Nilai'];
+            $col = 'A'; 
+            foreach ($headers as $h) { 
+                $sheet->setCellValue($col . '4', $h); 
+                $sheet->getStyle($col . '4')->getFont()->setBold(true);
+                $col++; 
+            }
+
+            $row = 5; $no = 1;
             foreach ($products as $p) {
                 $sheet->setCellValue('A' . $row, $no++);
                 $sheet->setCellValue('B' . $row, $p['name']);
-                $sheet->setCellValue('C' . $row, $p['stok']);
-                $sheet->setCellValue('D' . $row, $p['harga_beli']);
+                $sheet->setCellValue('C' . $row, $p['category_name'] ?? '-');
+                $sheet->setCellValue('D' . $row, $p['stok']);
+                $sheet->setCellValue('E' . $row, $p['harga_beli']);
+                $sheet->setCellValue('F' . $row, $p['stok'] * $p['harga_beli']);
+                $sheet->getStyle('E' . $row . ':F' . $row)->getNumberFormat()->setFormatCode('#,##0');
                 $row++;
             }
+            
+            $sheet->setCellValue('E' . $row, 'TOTAL NILAI ASET');
+            $sheet->setCellValue('F' . $row, $totalValue);
+            $sheet->getStyle('E' . $row.':F'.$row)->getFont()->setBold(true);
+            $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0');
+
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
-            $writer = new Xlsx($spreadsheet); $writer->save('php://output'); exit;
+            $writer = new Xlsx($spreadsheet); 
+            $writer->save('php://output'); 
+            exit;
         } else {
-            $html = '<h2>LAPORAN STOK BARANG</h2>';
-            $dompdf = new Dompdf(); $dompdf->loadHtml($html); $dompdf->setPaper('A4', 'portrait'); $dompdf->render();
-            $dompdf->stream($filename . ".pdf", ["Attachment" => true]); exit;
+            $html = '<style>body{font-family:sans-serif;font-size:12px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#eee;}</style>';
+            $html .= '<h2>LAPORAN STOK BARANG ESPERPAT</h2>';
+            $html .= '<p>Dicetak pada: '.date('d/m/Y H:i').'</p>';
+            $html .= '<table>';
+            $html .= '<thead><tr><th>No</th><th>Produk</th><th>Kategori</th><th>Stok</th><th>Harga Beli</th><th style="text-align:right">Total Nilai</th></tr></thead>';
+            $html .= '<tbody>';
+            $no = 1;
+            foreach ($products as $p) {
+                $html .= '<tr>';
+                $html .= '<td>'.$no++.'</td>';
+                $html .= '<td>'.$p['name'].'</td>';
+                $html .= '<td>'.($p['category_name'] ?? '-').'</td>';
+                $html .= '<td>'.$p['stok'].'</td>';
+                $html .= '<td>Rp '.number_format($p['harga_beli'], 0, ',', '.').'</td>';
+                $html .= '<td style="text-align:right">Rp '.number_format($p['stok'] * $p['harga_beli'], 0, ',', '.').'</td>';
+                $html .= '</tr>';
+            }
+            $html .= '<tr style="font-weight:bold; background:#f9f9f9;"><td colspan="5" style="text-align:right">TOTAL NILAI ASET GUDANG</td><td style="text-align:right">Rp '.number_format($totalValue, 0, ',', '.').'</td></tr>';
+            $html .= '</tbody></table>';
+
+            $dompdf = new Dompdf(); 
+            $dompdf->loadHtml($html); 
+            $dompdf->setPaper('A4', 'portrait'); 
+            $dompdf->render();
+            $dompdf->stream($filename . ".pdf", ["Attachment" => true]); 
+            exit;
         }
     }
 }
