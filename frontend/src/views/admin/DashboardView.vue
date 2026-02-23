@@ -154,7 +154,7 @@ const modules = [
   { label: 'Orders', icon: '🚚', color: 'purple', to: '/admin/orders' },
   { label: 'Category', icon: '📁', color: 'orange', to: '/admin/categories' },
   { label: 'Customer', icon: '👥', color: 'red', to: '/admin/customers' },
-  { label: 'Penjualan', icon: '📊', color: 'green', to: '/admin/reports/sales' },
+  { label: 'Laporan', icon: '📊', color: 'green', to: '/admin/reports/sales' },
   { label: 'Settings', icon: '⚙️', color: 'cyan', to: '/admin/settings' },
   { label: 'Promo', icon: '🏷️', color: 'yellow', to: '/admin/promo' },
   { label: 'Finance', icon: '💰', color: 'emerald', to: '/admin/finance' },
