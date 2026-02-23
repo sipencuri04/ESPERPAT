@@ -32,7 +32,7 @@
             <div class="f-group">
               <label>Status</label>
               <select v-model="filter.status">
-                <option value="all">Semua Status</option>
+                <option value="all">Semua (Sukses)</option>
                 <option value="paid">Lunas (Paid)</option>
                 <option value="shipped">Dikirim</option>
                 <option value="completed">Selesai</option>
@@ -46,6 +46,13 @@
         </div>
       </Transition>
 
+      <!-- Loading State -->
+      <div v-if="loading" class="loader-container">
+        <div class="spinner"></div>
+        <p>Menganalisa data keuangan...</p>
+      </div>
+
+      <template v-else>
       <!-- Main Balance & Target -->
       <div class="balance-card-v2 animate-fade-up">
         <div class="main-stats">
@@ -65,7 +72,7 @@
               <span class="t-pct">{{ growthData.achievement_percentage }}%</span>
            </div>
            <div class="progress-track">
-              <div class="progress-fill" :style="{ width: growthData.achievement_percentage + '%' }"></div>
+              <div class="progress-fill" :style="{ width: Math.min(100, growthData.achievement_percentage) + '%' }"></div>
            </div>
         </div>
 
@@ -113,6 +120,13 @@
             <strong class="val">{{ formatCurrency((financeData.total_sales || 0) - (financeData.total_profit || 0)) }}</strong>
           </div>
         </div>
+        <div class="summ-box full-width">
+          <div class="icon-box-orders">🛒</div>
+          <div class="info">
+            <span class="label">Total Order Sukses</span>
+            <strong class="val">{{ financeData.orders ? financeData.orders.length : 0 }} Pesanan</strong>
+          </div>
+        </div>
       </div>
 
       <!-- Detail Transactions with Expandable -->
@@ -121,11 +135,11 @@
           <h4>Rincian Laba Per Order</h4>
         </div>
         
-        <div class="tx-list">
+        <div class="tx-list" v-if="filteredOrders.length > 0">
           <div v-for="(item, i) in filteredOrders" :key="i" class="tx-card-v2" @click="toggleRow(i)">
             <div class="tx-main">
               <div class="tx-info">
-                <span class="tx-inv">{{ item.order.invoice_number }}</span>
+                <span class="tx-inv">{{ item.order.invoice_number }} <span class="tx-cust">— {{ item.order.customer_name || 'Guest' }}</span></span>
                 <div class="tx-meta">
                   <span class="tx-date">{{ formatDate(item.order.created_at) }}</span>
                   <span v-if="item.order.nomor_resi" class="tx-resi"> • Resi: {{ item.order.nomor_resi }}</span>
@@ -162,8 +176,20 @@
               </div>
             </Transition>
           </div>
+          
+          <div class="tx-summary-row">
+             <span>Total Laba Tertampil:</span>
+             <strong>{{ formatCurrency(filteredOrders.reduce((sum, item) => sum + item.order_profit, 0)) }}</strong>
+          </div>
+        </div>
+        
+        <div v-else class="empty-state">
+           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+           <p>Belum ada transaksi sukses di periode/status ini</p>
         </div>
       </div>
+
+      </template>
     </div>
   </div>
 </template>
@@ -385,8 +411,10 @@ onMounted(fetchAll);
 
 .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 1.5rem; margin-bottom: 30px; }
 .summ-box { background: white; padding: 15px; border-radius: 20px; border: 1px solid #f1f1f1; display: flex; align-items: center; gap: 10px; }
+.summ-box.full-width { grid-column: span 2; justify-content: center; }
 .icon-up { width: 28px; height: 28px; background: #f0fdf4; color: #22c55e; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
 .icon-down { width: 28px; height: 28px; background: #fef2f2; color: #ef4444; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+.icon-box-orders { width: 28px; height: 28px; background: #f5f3ff; color: #8b5cf6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
 .summ-box .label { display: block; font-size: 0.6rem; color: #999; font-weight: 700; text-transform: uppercase; }
 .summ-box .val { font-size: 0.8rem; font-weight: 800; color: #111; }
 
@@ -398,6 +426,7 @@ onMounted(fetchAll);
 .tx-main { padding: 15px; display: flex; align-items: center; gap: 12px; }
 .tx-info { flex: 1; }
 .tx-inv { display: block; font-size: 0.85rem; font-weight: 800; color: #111; }
+.tx-cust { font-weight: 600; color: #64748b; font-size: 0.75rem; }
 .tx-meta { display: flex; align-items: center; gap: 4px; }
 .tx-date { font-size: 0.65rem; color: #bbb; font-weight: 600; }
 .tx-resi { font-size: 0.65rem; color: #8b5cf6; font-weight: 700; }
@@ -420,6 +449,18 @@ onMounted(fetchAll);
 .d-total span { font-size: 0.8rem; font-weight: 800; color: #111; }
 .d-total strong { font-size: 0.95rem; font-weight: 900; color: #22c55e; }
 
+.tx-summary-row { background: #111; color: white; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-radius: 20px; margin-top: 10px; }
+.tx-summary-row span { font-size: 0.8rem; font-weight: 600; color: #9ca3af; }
+.tx-summary-row strong { font-size: 1.1rem; font-weight: 900; color: #22c55e; }
+
+.empty-state { text-align: center; padding: 40px 20px; background: white; border-radius: 24px; border: 1px dashed #e2e8f0; }
+.empty-state p { margin-top: 10px; font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
+
+.loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 20px; }
+.spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #8b5cf6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+.loader-container p { font-size: 0.85rem; font-weight: 700; color: #8b5cf6; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
 /* Animations */
 .slide-down-enter-active, .slide-down-leave-active { transition: all 0.3s ease; }
 .slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-20px); }
@@ -427,6 +468,7 @@ onMounted(fetchAll);
 .expand-enter-active { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; max-height: 500px; overflow: hidden; }
 .expand-leave-active { transition: max-height 0.3s ease-in, opacity 0.3s ease-in; max-height: 500px; overflow: hidden; }
 .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
+
 
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 </style>

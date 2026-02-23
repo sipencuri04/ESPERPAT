@@ -65,7 +65,7 @@ class OrderModel extends Model
         return $this->select('orders.*, users.name as customer_name')
                     ->join('users', 'users.id = orders.user_id', 'left')
                     ->where('DATE(orders.created_at)', $date)
-                    ->where('orders.status !=', 'cancelled')
+                    ->whereNotIn('orders.status', ['pending', 'cancelled'])
                     ->findAll();
     }
 
@@ -75,7 +75,7 @@ class OrderModel extends Model
                     ->join('users', 'users.id = orders.user_id', 'left')
                     ->where('MONTH(orders.created_at)', $month)
                     ->where('YEAR(orders.created_at)', $year)
-                    ->where('orders.status !=', 'cancelled')
+                    ->whereNotIn('orders.status', ['pending', 'cancelled'])
                     ->findAll();
     }
 }

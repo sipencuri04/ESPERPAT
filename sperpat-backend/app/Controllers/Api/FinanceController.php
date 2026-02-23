@@ -119,21 +119,33 @@ class FinanceController extends BaseApiController
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Invoice');
-        $sheet->setCellValue('B1', 'Customer');
-        $sheet->setCellValue('C1', 'Total Sales');
-        $sheet->setCellValue('D1', 'Profit');
-        $sheet->setCellValue('E1', 'Status');
+        
+        // Headers
+        $headers = ['A1' => 'Invoice', 'B1' => 'Customer', 'C1' => 'Total Sales', 'D1' => 'Profit', 'E1' => 'Status'];
+        foreach ($headers as $cell => $val) {
+            $sheet->setCellValue($cell, $val);
+            $sheet->getStyle($cell)->getFont()->setBold(true);
+            $sheet->getStyle($cell)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE5E7EB');
+        }
 
         $row = 2;
         foreach ($orders as $order) {
             $profitData = $this->orderItemModel->getProfitByOrder($order['id']);
             $sheet->setCellValue('A' . $row, $order['invoice_number']);
-            $sheet->setCellValue('B' . $row, $order['customer_name']);
+            $sheet->setCellValue('B' . $row, $order['customer_name'] ?? 'Guest');
             $sheet->setCellValue('C' . $row, $order['total']);
             $sheet->setCellValue('D' . $row, $profitData['total_profit']);
-            $sheet->setCellValue('E' . $row, $order['status']);
+            $sheet->setCellValue('E' . $row, strtoupper($order['status']));
+            
+            // Format Currency
+            $sheet->getStyle('C' . $row)->getNumberFormat()->setFormatCode('"Rp "#,##0_-');
+            $sheet->getStyle('D' . $row)->getNumberFormat()->setFormatCode('"Rp "#,##0_-');
             $row++;
+        }
+
+        // Auto size columns
+        foreach (range('A', 'E') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         $writer = new Xlsx($spreadsheet);
@@ -153,25 +165,57 @@ class FinanceController extends BaseApiController
         $year = (int) ($this->request->getGet('year') ?? date('Y'));
         $orders = $this->orderModel->getMonthlyReport($month, $year);
 
-        $html = "<h1>Laporan Keuangan {$month}/{$year}</h1>";
-        $html .= "<table border='1' width='100%' style='border-collapse: collapse;'>";
-        $html .= "<tr><th>Invoice</th><th>Customer</th><th>Total</th><th>Profit</th></tr>";
+        $monthStr = str_pad($month, 2, '0', STR_PAD_LEFT);
+        $period = date('F Y', strtotime("$year-$monthStr-01"));
+
+        $html = "
+        <style>
+            body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; margin: 0; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #8b5cf6; padding-bottom: 15px; }
+            .header h1 { color: #4c1d95; margin: 0 0 5px 0; font-size: 24px; }
+            .header p { margin: 0; color: #6b7280; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+            th { background-color: #f5f3ff; color: #4c1d95; text-align: left; padding: 12px; border-bottom: 2px solid #ddd; }
+            td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+            .text-right { text-align: right; }
+            .total-row { background-color: #f8fafc; font-weight: bold; border-top: 2px solid #333; }
+        </style>
+        <div class='header'>
+            <h1>Laporan Keuangan ESPERPAT</h1>
+            <p>Periode: {$period}</p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th class='text-right'>Total Transaksi</th>
+                    <th class='text-right'>Laba Bersih</th>
+                </tr>
+            </thead>
+            <tbody>";
         
         $grandTotal = 0;
         $grandProfit = 0;
         foreach ($orders as $order) {
             $profitData = $this->orderItemModel->getProfitByOrder($order['id']);
+            $custName = $order['customer_name'] ?: 'Guest';
             $html .= "<tr>
                 <td>{$order['invoice_number']}</td>
-                <td>{$order['customer_name']}</td>
-                <td>Rp " . number_format($order['total']) . "</td>
-                <td>Rp " . number_format($profitData['total_profit']) . "</td>
+                <td>{$custName}</td>
+                <td class='text-right'>Rp " . number_format($order['total'], 0, ',', '.') . "</td>
+                <td class='text-right'>Rp " . number_format($profitData['total_profit'], 0, ',', '.') . "</td>
             </tr>";
             $grandTotal += $order['total'];
             $grandProfit += $profitData['total_profit'];
         }
-        $html .= "<tr><td colspan='2'><b>TOTAL</b></td><td><b>Rp " . number_format($grandTotal) . "</b></td><td><b>Rp " . number_format($grandProfit) . "</b></td></tr>";
-        $html .= "</table>";
+        
+        $html .= "<tr class='total-row'>
+            <td colspan='2' class='text-right'>GRAND TOTAL</td>
+            <td class='text-right'>Rp " . number_format($grandTotal, 0, ',', '.') . "</td>
+            <td class='text-right'>Rp " . number_format($grandProfit, 0, ',', '.') . "</td>
+        </tr>
+        </tbody></table>";
 
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
@@ -182,7 +226,7 @@ class FinanceController extends BaseApiController
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        $filename = "Finance_Report_{$month}_{$year}.pdf";
+        $filename = "Finance_Report_{$monthStr}_{$year}.pdf";
         header('Content-Type: application/pdf');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         echo $dompdf->output();
