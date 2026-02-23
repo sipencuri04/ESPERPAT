@@ -142,6 +142,8 @@ $routes->group('api', function ($routes) {
                 $routes->get('inventory-analytics', 'Api\AdvancedReportController::inventoryAnalytics');
                 $routes->get('aging-piutang', 'Api\AdvancedReportController::agingPiutang');
                 $routes->get('aging-hutang', 'Api\AdvancedReportController::agingHutang');
+                $routes->get('export-sales/(:segment)', 'Api\AdvancedReportController::exportSales/$1');
+                $routes->get('export-inventory/(:segment)', 'Api\AdvancedReportController::exportInventory/$1');
             });
             $routes->get('migrate-erp', function() {
                 try {

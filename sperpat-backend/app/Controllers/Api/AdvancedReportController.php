@@ -9,6 +9,10 @@ use App\Models\ExpenseModel;
 use App\Models\PiutangModel;
 use App\Models\HutangModel;
 use CodeIgniter\API\ResponseTrait;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AdvancedReportController extends BaseApiController
 {
@@ -314,4 +318,80 @@ class AdvancedReportController extends BaseApiController
         return $this->successResponse(['aging' => $aging, 'raw' => $hutang]);
     }
 
+    public function exportSales($type = 'pdf')
+    {
+        list($startDate, $endDate) = $this->getDateRange();
+        $orders = $this->orderModel->where('DATE(created_at) >=', $startDate)
+                                  ->where('DATE(created_at) <=', $endDate)
+                                  ->whereNotIn('status', ['pending', 'cancelled'])
+                                  ->orderBy('created_at', 'DESC')
+                                  ->findAll();
+        
+        $totalOmzet = array_sum(array_column($orders, 'total'));
+        $filename = "Laporan_Penjualan_" . date('Ymd_His');
+
+        if ($type === 'excel') {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A1', 'LAPORAN PENJUALAN ESPERPAT');
+            $sheet->setCellValue('A2', "Periode: $startDate s/d $endDate");
+            
+            $headers = ['No', 'Invoice', 'Customer', 'Tanggal', 'Status', 'Total'];
+            $col = 'A';
+            foreach ($headers as $h) { $sheet->setCellValue($col . '4', $h); $col++; }
+
+            $row = 5; $no = 1;
+            foreach ($orders as $o) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $o['invoice_number']);
+                $sheet->setCellValue('C' . $row, 'Pelanggan');
+                $sheet->setCellValue('D' . $row, $o['created_at']);
+                $sheet->setCellValue('E' . $row, strtoupper($o['status']));
+                $sheet->setCellValue('F' . $row, $o['total']);
+                $row++;
+            }
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+        } else {
+            $html = '<h2>LAPORAN PENJUALAN</h2>';
+            $options = new Options(); $options->set('isHtml5ParserEnabled', true);
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html); $dompdf->setPaper('A4', 'portrait'); $dompdf->render();
+            $dompdf->stream($filename . ".pdf", ["Attachment" => true]);
+            exit;
+        }
+    }
+    public function exportInventory($type = 'pdf')
+    {
+        $products = $this->productModel->join('categories', 'categories.id = products.category_id', 'left')
+                                       ->select('products.*, categories.name as category_name')
+                                       ->findAll();
+        $filename = "Laporan_Stok_Barang_" . date('Ymd_His');
+
+        if ($type === 'excel') {
+            $spreadsheet = new Spreadsheet(); $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A1', 'LAPORAN STOK BARANG');
+            $headers = ['No', 'Nama Produk', 'Stok', 'Harga Beli'];
+            $col = 'A'; foreach ($headers as $h) { $sheet->setCellValue($col . '3', $h); $col++; }
+            $row = 4; $no = 1;
+            foreach ($products as $p) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $p['name']);
+                $sheet->setCellValue('C' . $row, $p['stok']);
+                $sheet->setCellValue('D' . $row, $p['harga_beli']);
+                $row++;
+            }
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+            $writer = new Xlsx($spreadsheet); $writer->save('php://output'); exit;
+        } else {
+            $html = '<h2>LAPORAN STOK BARANG</h2>';
+            $dompdf = new Dompdf(); $dompdf->loadHtml($html); $dompdf->setPaper('A4', 'portrait'); $dompdf->render();
+            $dompdf->stream($filename . ".pdf", ["Attachment" => true]); exit;
+        }
+    }
 }

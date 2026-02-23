@@ -87,7 +87,11 @@ const loadData = async () => {
 };
 
 const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0);
-const exportData = (type) => { toast.success(`Exporting ${type.toUpperCase()}...`); };
+const exportData = (type) => { 
+  const token = localStorage.getItem('token');
+  const url = `${import.meta.env.VITE_API_URL || 'https://esperpat-backend.vercel.app/api'}/reports/advanced/export-inventory/${type}?token=${token}`;
+  window.open(url, '_blank');
+};
 
 onMounted(loadData);
 </script>
