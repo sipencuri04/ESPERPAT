@@ -151,6 +151,8 @@ onMounted(() => {
     address: authStore.user?.address || 'Magelang'
   };
 });
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 
 const openEditModal = (type) => {
   editType.value = type;
@@ -181,14 +183,14 @@ const saveEdit = async () => {
              user.value.phone = payload.phone;
              user.value.address = payload.address;
          }
-         alert(res.data.message || 'Profile updated successfully!');
+         toast.success(res.data.message || 'Profile berhasil diperbarui!', 'Update Berhasil! ✅');
          editModalOpen.value = false;
      } else {
-         alert(res.data?.message || 'Update gagal.');
+         toast.error(res.data?.message || 'Update gagal.');
      }
   } catch (err) {
      console.error(err);
-     alert(err.response?.data?.message || 'Terjadi kesalahan sistem.');
+     toast.error(err.response?.data?.message || 'Terjadi kesalahan sistem.');
   } finally {
      saving.value = false;
   }

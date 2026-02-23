@@ -197,6 +197,8 @@ const saving = ref(false);
 
 const promoModalOpen = ref(false);
 const availablePromos = ref([]);
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
@@ -247,7 +249,7 @@ const doClaim = (promo) => {
 
 const copyCode = (code) => {
    navigator.clipboard.writeText(code).then(() => {
-      alert("Kode berhsil disalin!");
+      toast.success('Kode berhasil disalin!');
    });
 };
 
@@ -262,14 +264,14 @@ const saveEdit = async () => {
   try {
      const res = await client.put('profile', { password: editValue.value });
      if (res.data?.status) {
-         alert(res.data.message || 'Konfirmasi ganti password telah dikirim ke email Anda.');
+         toast.success(res.data.message || 'Konfirmasi ganti password telah dikirim ke email Anda.', 'Cek Email Anda! 📧');
          editModalOpen.value = false;
      } else {
-         alert(res.data?.message || 'Gagal merubah password.');
+         toast.error(res.data?.message || 'Gagal merubah password.');
      }
   } catch (err) {
      console.error(err);
-     alert(err.response?.data?.message || 'Terjadi kesalahan sistem.');
+     toast.error(err.response?.data?.message || 'Terjadi kesalahan sistem.');
   } finally {
      saving.value = false;
   }

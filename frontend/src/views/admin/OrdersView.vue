@@ -183,6 +183,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import client from '../../api/client';
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 
 const orders = ref([]);
 const loading = ref(true);
@@ -232,53 +234,54 @@ const openOrderDetail = async (order) => {
         isDetailOpen.value = true;
         resiInput.value = selectedOrder.value.nomor_resi || '';
     } catch (err) {
-        alert('Gagal memuat detail pesanan.');
+        toast.error('Gagal memuat detail pesanan.');
     } finally {
         loading.value = false;
     }
 };
 
 const updateStatus = async (newStatus) => {
-    if (!confirm(`Ubah status pesanan ke ${newStatus.toUpperCase()}?`)) return;
-    
-    try {
-        await client.put(`orders/${selectedOrder.value.id}/status`, {
-            status: newStatus,
-            nomor_resi: resiInput.value
-        });
-        isDetailOpen.value = false;
-        fetchOrders();
-    } catch (err) {
-        alert(err.response?.data?.message || 'Gagal update status.');
-    }
+    toast.ask(`Ubah status pesanan ke ${newStatus.toUpperCase()}?`, async () => {
+      try {
+          await client.put(`orders/${selectedOrder.value.id}/status`, {
+              status: newStatus,
+              nomor_resi: resiInput.value
+          });
+          toast.success(`Status berhasil diubah ke ${newStatus.toUpperCase()}.`, 'Status Diperbarui! ✅');
+          isDetailOpen.value = false;
+          fetchOrders();
+      } catch (err) {
+          toast.error(err.response?.data?.message || 'Gagal update status.');
+      }
+    });
 };
 
 const closeDetail = () => { isDetailOpen.value = false; };
 
 const approvePayment = async () => {
-   if (!confirm('Bukti pembayaran valid. Setujui pesanan ini?')) return;
-   try {
-       // Keep as paid (approved), admin can then ship
+   toast.ask('Bukti pembayaran valid. Setujui pesanan ini?', async () => {
+     try {
        await client.put(`orders/${selectedOrder.value.id}/status`, { status: 'paid' });
-       alert('Pembayaran disetujui! Silakan masukkan resi untuk kirim barang.');
-       // Reload detail
+       toast.success('Pembayaran disetujui! Silakan masukkan resi untuk kirim barang.', 'Disetujui! ✅');
        const res = await client.get(`orders/${selectedOrder.value.id}`);
        selectedOrder.value = res.data.data;
-   } catch (err) {
-       alert(err.response?.data?.message || 'Gagal approve.');
-   }
+     } catch (err) {
+       toast.error(err.response?.data?.message || 'Gagal approve.');
+     }
+   }, 'Approve Pembayaran?');
 };
 
 const rejectPayment = async () => {
-   if (!confirm('Tolak bukti pembayaran ini? Pesanan akan kembali ke Pending.')) return;
-   try {
+   toast.ask('Tolak bukti pembayaran ini? Pesanan akan kembali ke Pending.', async () => {
+     try {
        await client.put(`orders/${selectedOrder.value.id}/status`, { status: 'pending' });
-       alert('Bukti pembayaran ditolak. Pelanggan harus upload ulang.');
+       toast.success('Bukti pembayaran ditolak. Pelanggan harus upload ulang.', 'Ditolak');
        isDetailOpen.value = false;
        fetchOrders();
-   } catch (err) {
-       alert(err.response?.data?.message || 'Gagal reject.');
-   }
+     } catch (err) {
+       toast.error(err.response?.data?.message || 'Gagal reject.');
+     }
+   }, 'Tolak Pembayaran?');
 };
 
 const openProofFull = () => {

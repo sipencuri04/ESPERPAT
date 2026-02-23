@@ -156,6 +156,8 @@ const cartStore = useCartStore();
 const authStore = useAuthStore();
 const router = useRouter();
 const baseUrl = import.meta.env.VITE_API_BASE_URL.replace('/api/', '/');
+import { useToast } from '../composables/useToast';
+const toast = useToast();
 
 const isConfirmOpen = ref(false);
 const isSuccessOpen = ref(false);
@@ -180,7 +182,7 @@ const applyPromo = async () => {
     if (!promoInput.value.trim()) return;
 
     if (!authStore.isAuthenticated) {
-        alert('Silakan login terlebih dahulu untuk menggunakan kupon');
+        toast.warning('Silakan login terlebih dahulu untuk menggunakan kupon.');
         router.push('/login');
         return;
     }
@@ -213,7 +215,7 @@ const removePromo = () => {
 
 const handleCheckout = () => {
     if (!authStore.isAuthenticated) {
-        alert('Silakan login terlebih dahulu');
+        toast.warning('Silakan login terlebih dahulu untuk checkout.');
         router.push('/login');
         return;
     }
@@ -241,7 +243,7 @@ const confirmOrder = async () => {
         cartStore.clearCart(); // Clear cart globally including storage
         isSuccessOpen.value = true;
     } catch (err) {
-        alert(err.response?.data?.message || 'Gagal membuat pesanan');
+        toast.error(err.response?.data?.message || 'Gagal membuat pesanan.');
     } finally {
         submitting.value = false;
     }

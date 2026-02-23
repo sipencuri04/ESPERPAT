@@ -245,6 +245,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 import { useRouter } from 'vue-router';
 import client from '../../api/client';
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -365,7 +367,7 @@ const openOrderDetail = async (id) => {
        }
    } catch(e) {
        console.error("Gagal load detail", e);
-       alert("Gagal memuat detail pesanan.");
+       toast.error('Gagal memuat detail pesanan.');
        isModalOpen.value = false;
    }
 };
@@ -426,31 +428,32 @@ const submitPayment = async () => {
            headers: { 'Content-Type': 'multipart/form-data' }
        });
        if (res.data?.status) {
-           alert(res.data.message || 'Pembayaran berhasil dikirim!');
+           toast.success(res.data.message || 'Bukti pembayaran berhasil dikirim! Mohon tunggu verifikasi admin.', 'Pembayaran Terkirim! 🎉');
            closePayModal();
            closeModal();
            fetchOrders();
        } else {
-           alert(res.data?.message || 'Gagal mengirim bukti pembayaran.');
+           toast.error(res.data?.message || 'Gagal mengirim bukti pembayaran.');
        }
    } catch (e) {
        console.error(e);
-       alert(e.response?.data?.message || 'Gagal mengirim bukti pembayaran.');
+       toast.error(e.response?.data?.message || 'Gagal mengirim bukti pembayaran.');
    } finally {
        submitting.value = false;
    }
 };
 
 const doCancel = async (id) => {
-   if (!confirm("Yakin ingin membatalkan pesanan ini?")) return;
-   try {
+   toast.ask('Yakin ingin membatalkan pesanan ini? Stok akan dikembalikan.', async () => {
+     try {
        await client.post('orders/' + id + '/cancel');
-       alert("Pesanan berhasil dibatalkan.");
+       toast.success('Pesanan berhasil dibatalkan dan stok telah dikembalikan.', 'Pesanan Dibatalkan');
        closeModal();
        fetchOrders();
-   } catch (e) {
-       alert(e.response?.data?.message || "Gagal membatalkan pesanan.");
-   }
+     } catch (e) {
+       toast.error(e.response?.data?.message || 'Gagal membatalkan pesanan.');
+     }
+   }, 'Batalkan Pesanan?');
 };
 </script>
 

@@ -2,6 +2,7 @@
 import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { ref, computed } from 'vue';
 import { useCartStore } from './stores/cart';
+import ToastProvider from './components/ToastProvider.vue';
 
 const route = useRoute();
 const cartStore = useCartStore();
@@ -51,6 +52,7 @@ const showBottomNav = computed(() => {
       </router-link>
     </div>
 
+    <ToastProvider />
   </div>
 </template>
 

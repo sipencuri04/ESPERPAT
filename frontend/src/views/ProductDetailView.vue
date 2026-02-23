@@ -138,10 +138,12 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import client from '../api/client';
 import { useCartStore } from '../stores/cart';
+import { useToast } from '../composables/useToast';
 
 const route = useRoute();
 const router = useRouter();
 const cartStore = useCartStore();
+const toast = useToast();
 
 const product = ref(null);
 const loading = ref(true);
@@ -171,7 +173,7 @@ const handleAddToCart = () => {
   for (let i = 0; i < qty.value; i++) {
     cartStore.addItem(product.value);
   }
-  alert(`${qty.value}x ${product.value.name} ditambahkan ke keranjang!`);
+  toast.success(`${qty.value}x ${product.value.name} ditambahkan ke keranjang!`, 'Berhasil Ditambahkan! 🛒');
 };
 
 const handleBuyNow = () => {
