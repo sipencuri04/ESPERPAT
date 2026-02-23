@@ -321,24 +321,25 @@ class AdvancedReportController extends BaseApiController
     public function exportSales($type = 'pdf')
     {
         list($startDate, $endDate) = $this->getDateRange();
-        $orders = $this->orderModel->select('orders.*, users.name as customer_name')
-                                  ->join('users', 'users.id = orders.user_id', 'left')
-                                  ->where('DATE(orders.created_at) >=', $startDate)
-                                  ->where('DATE(orders.created_at) <=', $endDate)
-                                  ->whereNotIn('orders.status', ['pending', 'cancelled'])
-                                  ->orderBy('orders.created_at', 'DESC')
-                                  ->findAll();
         
-        $totalOmzet = array_sum(array_column($orders, 'total'));
-        $filename = "Laporan_Penjualan_" . date('Ymd_His');
+        $items = $this->orderItemModel->select('order_items.*, orders.invoice_number, orders.created_at, products.name as product_name, products.harga_beli as purchase_price')
+                                     ->join('orders', 'orders.id = order_items.order_id')
+                                     ->join('products', 'products.id = order_items.product_id')
+                                     ->where('DATE(orders.created_at) >=', $startDate)
+                                     ->where('DATE(orders.created_at) <=', $endDate)
+                                     ->whereNotIn('orders.status', ['pending', 'cancelled'])
+                                     ->orderBy('orders.created_at', 'ASC')
+                                     ->findAll();
+        
+        $filename = "Laporan_Penjualan_Detail_" . date('Ymd_His');
 
         if ($type === 'excel') {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-            $sheet->setCellValue('A1', 'LAPORAN PENJUALAN ESPERPAT');
+            $sheet->setCellValue('A1', 'LAPORAN PENJUALAN DETAIL ESPERPAT');
             $sheet->setCellValue('A2', "Periode: $startDate s/d $endDate");
             
-            $headers = ['No', 'Invoice', 'Customer', 'Tanggal', 'Status', 'Total'];
+            $headers = ['No', 'Invoice', 'Tanggal', 'Nama Barang', 'Qty', 'Harga Beli', 'Harga Jual', 'Total Jual', 'HPP', 'Laba'];
             $col = 'A';
             foreach ($headers as $h) { 
                 $sheet->setCellValue($col . '4', $h); 
@@ -347,21 +348,26 @@ class AdvancedReportController extends BaseApiController
             }
 
             $row = 5; $no = 1;
-            foreach ($orders as $o) {
+            foreach ($items as $i) {
+                $totalJual = $i['subtotal'];
+                $hpp = $i['qty'] * $i['purchase_price'];
+                $laba = $totalJual - $hpp;
+
                 $sheet->setCellValue('A' . $row, $no++);
-                $sheet->setCellValue('B' . $row, $o['invoice_number']);
-                $sheet->setCellValue('C' . $row, $o['customer_name'] ?? 'Pelanggan');
-                $sheet->setCellValue('D' . $row, date('d/m/Y H:i', strtotime($o['created_at'])));
-                $sheet->setCellValue('E' . $row, strtoupper($o['status']));
-                $sheet->setCellValue('F' . $row, $o['total']);
-                $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->setCellValue('B' . $row, $i['invoice_number']);
+                $sheet->setCellValue('C' . $row, date('d/m/Y', strtotime($i['created_at'])));
+                $sheet->setCellValue('D' . $row, $i['product_name']);
+                $sheet->setCellValue('E' . $row, $i['qty']);
+                $sheet->setCellValue('F' . $row, $i['purchase_price']);
+                $sheet->setCellValue('G' . $row, $i['harga']);
+                $sheet->setCellValue('H' . $row, $totalJual);
+                $sheet->setCellValue('I' . $row, $hpp);
+                $sheet->setCellValue('J' . $row, $laba);
+                
+                // Format numbers
+                $sheet->getStyle('F' . $row . ':J' . $row)->getNumberFormat()->setFormatCode('#,##0');
                 $row++;
             }
-            
-            $sheet->setCellValue('E' . $row, 'TOTAL OMZET');
-            $sheet->setCellValue('F' . $row, $totalOmzet);
-            $sheet->getStyle('E' . $row.':F'.$row)->getFont()->setBold(true);
-            $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0');
 
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
@@ -369,31 +375,38 @@ class AdvancedReportController extends BaseApiController
             $writer->save('php://output');
             exit;
         } else {
-            $html = '<style>body{font-family:sans-serif;font-size:12px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#eee;}</style>';
-            $html .= '<h2>LAPORAN PENJUALAN ESPERPAT</h2>';
+            $html = '<style>body{font-family:sans-serif;font-size:10px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:5px;text-align:left;} th{background:#eee;}</style>';
+            $html .= '<h2>LAPORAN PENJUALAN DETAIL ESPERPAT</h2>';
             $html .= '<p>Periode: '.$startDate.' s/d '.$endDate.'</p>';
             $html .= '<table>';
-            $html .= '<thead><tr><th>No</th><th>Invoice</th><th>Customer</th><th>Tanggal</th><th>Status</th><th style="text-align:right">Total</th></tr></thead>';
+            $html .= '<thead><tr><th>No</th><th>Invoice</th><th>Tanggal</th><th>Nama Barang</th><th>Qty</th><th>Harga Beli</th><th>Harga Jual</th><th>Total Jual</th><th>HPP</th><th>Laba</th></tr></thead>';
             $html .= '<tbody>';
             $no = 1;
-            foreach ($orders as $o) {
+            foreach ($items as $i) {
+                $totalJual = $i['subtotal'];
+                $hpp = $i['qty'] * $i['purchase_price'];
+                $laba = $totalJual - $hpp;
+
                 $html .= '<tr>';
                 $html .= '<td>'.$no++.'</td>';
-                $html .= '<td>'.$o['invoice_number'].'</td>';
-                $html .= '<td>'.($o['customer_name'] ?? 'Pelanggan').'</td>';
-                $html .= '<td>'.date('d/m/Y', strtotime($o['created_at'])).'</td>';
-                $html .= '<td>'.strtoupper($o['status']).'</td>';
-                $html .= '<td style="text-align:right">Rp '.number_format($o['total'], 0, ',', '.').'</td>';
+                $html .= '<td>'.$i['invoice_number'].'</td>';
+                $html .= '<td>'.date('d/m/Y', strtotime($i['created_at'])).'</td>';
+                $html .= '<td>'.$i['product_name'].'</td>';
+                $html .= '<td>'.$i['qty'].'</td>';
+                $html .= '<td>'.number_format($i['purchase_price'], 0, ',', '.').'</td>';
+                $html .= '<td>'.number_format($i['harga'], 0, ',', '.').'</td>';
+                $html .= '<td>'.number_format($totalJual, 0, ',', '.').'</td>';
+                $html .= '<td>'.number_format($hpp, 0, ',', '.').'</td>';
+                $html .= '<td>'.number_format($laba, 0, ',', '.').'</td>';
                 $html .= '</tr>';
             }
-            $html .= '<tr style="font-weight:bold; background:#f9f9f9;"><td colspan="5" style="text-align:right">TOTAL OMZET</td><td style="text-align:right">Rp '.number_format($totalOmzet, 0, ',', '.').'</td></tr>';
             $html .= '</tbody></table>';
 
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
             $dompdf = new Dompdf($options);
+            $dompdf->setPaper('A4', 'landscape'); // Use landscape for many columns
             $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'portrait');
             $dompdf->render();
             $dompdf->stream($filename . ".pdf", ["Attachment" => true]);
             exit;
