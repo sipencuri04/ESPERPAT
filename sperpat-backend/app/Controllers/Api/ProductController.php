@@ -4,14 +4,55 @@ namespace App\Controllers\Api;
 
 use App\Models\ProductModel;
 use App\Models\CategoryModel;
+use App\Models\ExpenseModel;
 
 class ProductController extends BaseApiController
 {
     protected ProductModel $productModel;
+    protected ExpenseModel $expenseModel;
 
     public function __construct()
     {
         $this->productModel = new ProductModel();
+        $this->expenseModel = new ExpenseModel();
+    }
+
+    public function restock($id = null)
+    {
+        $product = $this->productModel->find($id);
+        if (!$product) {
+            return $this->errorResponse('Produk tidak ditemukan.', 404);
+        }
+
+        $qty = (int) $this->request->getPost('qty');
+        $hargaBeli = (float) $this->request->getPost('harga_beli');
+        $hargaJual = (float) $this->request->getPost('harga_jual');
+
+        if ($qty <= 0) {
+            return $this->errorResponse('Quantity harus lebih dari 0.');
+        }
+
+        // 1. Update Product
+        $newStock = $product['stok'] + $qty;
+        $this->productModel->update($id, [
+            'stok' => $newStock,
+            'harga_beli' => $hargaBeli,
+            'harga_jual' => $hargaJual
+        ]);
+
+        // 2. Record Expense (Cash Out)
+        $totalAmount = $qty * $hargaBeli;
+        $this->expenseModel->insert([
+            'description' => "Restok Barang: " . $product['name'] . " ($qty pcs)",
+            'category'    => 'Restok',
+            'amount'      => $totalAmount,
+            'date'        => date('Y-m-d')
+        ]);
+
+        return $this->successResponse([
+            'product' => $this->productModel->find($id),
+            'expense_recorded' => $totalAmount
+        ], 'Restok berhasil dan kas keluar telah dicatat.');
     }
 
     public function index()

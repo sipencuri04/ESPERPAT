@@ -123,6 +123,7 @@ $routes->group('api', function ($routes) {
         $routes->group('', ['filter' => 'role:admin,superuser'], function ($routes) {
             $routes->post('products', 'Api\ProductController::create');
             $routes->post('products/(:num)', 'Api\ProductController::update/$1');
+            $routes->post('products/(:num)/restock', 'Api\ProductController::restock/$1');
             $routes->delete('products/(:num)', 'Api\ProductController::delete/$1');
 
             $routes->post('categories', 'Api\CategoryController::create');
@@ -144,6 +145,8 @@ $routes->group('api', function ($routes) {
                 $routes->get('aging-hutang', 'Api\AdvancedReportController::agingHutang');
                 $routes->get('export-sales/(:segment)', 'Api\AdvancedReportController::exportSales/$1');
                 $routes->get('export-inventory/(:segment)', 'Api\AdvancedReportController::exportInventory/$1');
+                $routes->get('cash-out', 'Api\AdvancedReportController::cashOut');
+                $routes->get('export-cash-out/(:segment)', 'Api\AdvancedReportController::exportCashOut/$1');
             });
             $routes->get('migrate-erp', function() {
                 try {

@@ -490,4 +490,97 @@ class AdvancedReportController extends BaseApiController
             exit;
         }
     }
+    public function cashOut()
+    {
+        list($startDate, $endDate) = $this->getDateRange();
+        $expenses = $this->expenseModel->where('date >=', $startDate)
+                                       ->where('date <=', $endDate)
+                                       ->where('category', 'Restok')
+                                       ->orderBy('date', 'DESC')
+                                       ->findAll();
+        
+        $totalAmount = array_sum(array_column($expenses, 'amount'));
+        
+        return $this->successResponse([
+            'total_amount' => $totalAmount,
+            'count'        => count($expenses),
+            'expenses'     => $expenses
+        ]);
+    }
+
+    public function exportCashOut($type = 'pdf')
+    {
+        list($startDate, $endDate) = $this->getDateRange();
+        $expenses = $this->expenseModel->where('date >=', $startDate)
+                                       ->where('date <=', $endDate)
+                                       ->where('category', 'Restok')
+                                       ->orderBy('date', 'ASC')
+                                       ->findAll();
+        
+        $totalAmount = array_sum(array_column($expenses, 'amount'));
+        $filename = "Laporan_Kas_Keluar_Restok_" . date('Ymd_His');
+
+        if ($type === 'excel') {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A1', 'LAPORAN KAS KELUAR (RESTOK) ESPERPAT');
+            $sheet->setCellValue('A2', "Periode: $startDate s/d $endDate");
+            
+            $headers = ['No', 'Deskripsi', 'Tanggal', 'Jumlah'];
+            $col = 'A';
+            foreach ($headers as $h) { 
+                $sheet->setCellValue($col . '4', $h); 
+                $sheet->getStyle($col . '4')->getFont()->setBold(true);
+                $col++; 
+            }
+
+            $row = 5; $no = 1;
+            foreach ($expenses as $e) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $e['description']);
+                $sheet->setCellValue('C' . $row, date('d/m/Y', strtotime($e['date'])));
+                $sheet->setCellValue('D' . $row, $e['amount']);
+                $sheet->getStyle('D' . $row)->getNumberFormat()->setFormatCode('#,##0');
+                $row++;
+            }
+            
+            $sheet->setCellValue('C' . $row, 'TOTAL KAS KELUAR');
+            $sheet->setCellValue('D' . $row, $totalAmount);
+            $sheet->getStyle('C' . $row.':D'.$row)->getFont()->setBold(true);
+            $sheet->getStyle('D' . $row)->getNumberFormat()->setFormatCode('#,##0');
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+        } else {
+            $html = '<style>body{font-family:sans-serif;font-size:12px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#eee;}</style>';
+            $html .= '<h2>LAPORAN KAS KELUAR (RESTOK) ESPERPAT</h2>';
+            $html .= '<p>Periode: '.$startDate.' s/d '.$endDate.'</p>';
+            $html .= '<table>';
+            $html .= '<thead><tr><th>No</th><th>Deskripsi</th><th>Tanggal</th><th style="text-align:right">Jumlah</th></tr></thead>';
+            $html .= '<tbody>';
+            $no = 1;
+            foreach ($expenses as $e) {
+                $html .= '<tr>';
+                $html .= '<td>'.$no++.'</td>';
+                $html .= '<td>'.$e['description'].'</td>';
+                $html .= '<td>'.date('d/m/Y', strtotime($e['date'])).'</td>';
+                $html .= '<td style="text-align:right">Rp '.number_format($e['amount'], 0, ',', '.').'</td>';
+                $html .= '</tr>';
+            }
+            $html .= '<tr style="font-weight:bold; background:#f9f9f9;"><td colspan="3" style="text-align:right">TOTAL KAS KELUAR</td><td style="text-align:right">Rp '.number_format($totalAmount, 0, ',', '.').'</td></tr>';
+            $html .= '</tbody></table>';
+
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $dompdf->stream($filename . ".pdf", ["Attachment" => true]);
+            exit;
+        }
+    }
 }

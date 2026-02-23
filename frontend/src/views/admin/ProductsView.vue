@@ -516,19 +516,19 @@ const handleRestockSubmit = async () => {
     
     // We send all required fields to satisfy backend validation
     const formData = new FormData();
-    formData.append('name', selectedProduct.value.name);
-    formData.append('category_id', selectedProduct.value.category_id);
-    formData.append('stok', newStock);
+    formData.append('qty', restockForm.value.qty);
     formData.append('harga_beli', restockForm.value.harga_beli);
     formData.append('harga_jual', restockForm.value.harga_jual);
-    formData.append('deskripsi', selectedProduct.value.deskripsi || '');
 
-    await client.post(`products/${selectedProduct.value.id}`, formData);
+    const res = await client.post(`products/${selectedProduct.value.id}/restock`, formData);
     
-    // Update local state
-    selectedProduct.value.stok = newStock;
-    selectedProduct.value.harga_beli = restockForm.value.harga_beli;
-    selectedProduct.value.harga_jual = restockForm.value.harga_jual;
+    // Update local state with fresh data from server
+    const updatedProd = res.data.data.product;
+    selectedProduct.value.stok = updatedProd.stok;
+    selectedProduct.value.harga_beli = updatedProd.harga_beli;
+    selectedProduct.value.harga_jual = updatedProd.harga_jual;
+    
+    toast.success('Restok berhasil & Kas Keluar tercatat!');
     
     isRestockOpen.value = false;
     fetchProducts();

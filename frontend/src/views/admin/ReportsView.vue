@@ -16,6 +16,7 @@
             <span class="group-title">LAPORAN DASAR</span>
             <button class="nav-btn" :class="{ active: currentTab === 'SalesReport' }" @click="selectTab('SalesReport')">Laporan Penjualan</button>
             <button class="nav-btn" :class="{ active: currentTab === 'InventoryReport' }" @click="selectTab('InventoryReport')">Stok Barang</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'CashOutReport' }" @click="selectTab('CashOutReport')">Kas Keluar (Restok)</button>
           </div>
         </nav>
       </aside>
@@ -68,9 +69,10 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 // Import basic sub-components
 import SalesReport from '@/components/admin/reports/SalesReport.vue';
 import InventoryReport from '@/components/admin/reports/InventoryReport.vue';
+import CashOutReport from '@/components/admin/reports/CashOutReport.vue';
 
 const componentsMap = {
-  SalesReport, InventoryReport
+  SalesReport, InventoryReport, CashOutReport
 };
 
 const currentTab = ref('SalesReport');
