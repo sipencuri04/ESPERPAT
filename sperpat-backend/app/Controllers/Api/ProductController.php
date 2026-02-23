@@ -24,21 +24,32 @@ class ProductController extends BaseApiController
             return $this->errorResponse('Produk tidak ditemukan.', 404);
         }
 
-        $qty = (int) $this->request->getPost('qty');
-        $hargaBeli = (float) $this->request->getPost('harga_beli');
-        $hargaJual = (float) $this->request->getPost('harga_jual');
+        if (strpos($this->request->getHeaderLine('Content-Type'), 'application/json') !== false) {
+            $jsonData = $this->request->getJSON(true);
+            $qty = (int) ($jsonData['qty'] ?? 0);
+            $hargaBeli = (float) ($jsonData['harga_beli'] ?? 0);
+            $hargaJual = (float) ($jsonData['harga_jual'] ?? 0);
+        } else {
+            $qty = (int) $this->request->getVar('qty');
+            $hargaBeli = (float) $this->request->getVar('harga_beli');
+            $hargaJual = (float) $this->request->getVar('harga_jual');
+        }
 
         if ($qty <= 0) {
             return $this->errorResponse('Quantity harus lebih dari 0.');
         }
 
-        // 1. Update Product
-        $newStock = $product['stok'] + $qty;
-        $this->productModel->update($id, [
+        // 1. Update Product (Skip validation because we only update specific fields)
+        $newStock = (int)$product['stok'] + $qty;
+        $updateData = [
             'stok' => $newStock,
             'harga_beli' => $hargaBeli,
             'harga_jual' => $hargaJual
-        ]);
+        ];
+
+        if (!$this->productModel->skipValidation(true)->update($id, $updateData)) {
+            return $this->errorResponse('Gagal merekam update stok barang.', 400, $this->productModel->errors());
+        }
 
         // 2. Record Expense (Cash Out)
         $totalAmount = $qty * $hargaBeli;

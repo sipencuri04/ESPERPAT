@@ -515,12 +515,11 @@ const handleRestockSubmit = async () => {
     const newStock = parseInt(selectedProduct.value.stok) + parseInt(restockForm.value.qty);
     
     // We send all required fields to satisfy backend validation
-    const formData = new FormData();
-    formData.append('qty', restockForm.value.qty);
-    formData.append('harga_beli', restockForm.value.harga_beli);
-    formData.append('harga_jual', restockForm.value.harga_jual);
-
-    const res = await client.post(`products/${selectedProduct.value.id}/restock`, formData);
+    const res = await client.post(`products/${selectedProduct.value.id}/restock`, {
+      qty: restockForm.value.qty,
+      harga_beli: restockForm.value.harga_beli,
+      harga_jual: restockForm.value.harga_jual
+    });
     
     // Update local state with fresh data from server
     const updatedProd = res.data.data.product;
