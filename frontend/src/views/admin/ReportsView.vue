@@ -3,7 +3,7 @@
     <div class="container mobile-frame reports-layout">
       
       <!-- SIDEBAR -->
-      <aside class="reports-sidebar animate-fade-right">
+      <aside class="reports-sidebar animate-fade-right" v-show="!isMobile || isMobileMenuOpen">
         <div class="sidebar-header">
           <button @click="$router.push('/admin')" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -14,28 +14,36 @@
         <nav class="report-nav">
           <div class="nav-group">
             <span class="group-title">FINANCIALS</span>
-            <button class="nav-btn" :class="{ active: currentTab === 'LabaRugi' }" @click="currentTab = 'LabaRugi'">Laba Rugi</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'CashFlow' }" @click="currentTab = 'CashFlow'">Cash Flow</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'Neraca' }" @click="currentTab = 'Neraca'">Neraca</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'LabaRugi' }" @click="selectTab('LabaRugi')">Laba Rugi</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'CashFlow' }" @click="selectTab('CashFlow')">Cash Flow</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'Neraca' }" @click="selectTab('Neraca')">Neraca</button>
           </div>
           
           <div class="nav-group">
             <span class="group-title">SALES & INVENTORY</span>
-            <button class="nav-btn" :class="{ active: currentTab === 'SalesReport' }" @click="currentTab = 'SalesReport'">Sales Report</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'InventoryReport' }" @click="currentTab = 'InventoryReport'">Inventory Report</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'InventoryAnalytics' }" @click="currentTab = 'InventoryAnalytics'">Inventory Analytics</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'SalesReport' }" @click="selectTab('SalesReport')">Sales Report</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'InventoryReport' }" @click="selectTab('InventoryReport')">Inventory Report</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'InventoryAnalytics' }" @click="selectTab('InventoryAnalytics')">Inventory Analytics</button>
           </div>
 
           <div class="nav-group">
             <span class="group-title">PAYABLES & RECEIVABLES</span>
-            <button class="nav-btn" :class="{ active: currentTab === 'AgingPiutang' }" @click="currentTab = 'AgingPiutang'">Aging Piutang</button>
-            <button class="nav-btn" :class="{ active: currentTab === 'AgingHutang' }" @click="currentTab = 'AgingHutang'">Aging Hutang</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'AgingPiutang' }" @click="selectTab('AgingPiutang')">Aging Piutang</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'AgingHutang' }" @click="selectTab('AgingHutang')">Aging Hutang</button>
           </div>
         </nav>
       </aside>
 
       <!-- MAIN CONTENT -->
-      <main class="reports-content">
+      <main class="reports-content" v-show="!isMobile || !isMobileMenuOpen">
+        <!-- Back to Menu Button on Mobile -->
+        <div class="mobile-nav-back animate-fade-up" v-if="isMobile && !isMobileMenuOpen">
+            <button class="back-menu-btn" @click="isMobileMenuOpen = true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span>Kembali ke Menu Pilihan Laporan</span>
+            </button>
+        </div>
+
         <!-- Persistent Filter Bar -->
         <div class="top-filter-bar animate-fade-up">
           <div class="filter-group">
@@ -69,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, computed, shallowRef } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 // Import all sub-components
 import LabaRugi from '@/components/admin/reports/LabaRugi.vue';
@@ -97,6 +105,33 @@ const filter = ref({
 const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const years = [2024, 2025, 2026];
 
+// MOBILE UX LOGIC
+const isMobile = ref(false);
+const isMobileMenuOpen = ref(true);
+
+const checkDevice = () => {
+    isMobile.value = window.innerWidth <= 900;
+    if (!isMobile.value) {
+        isMobileMenuOpen.value = true; // Always open on desktop
+    }
+};
+
+onMounted(() => {
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', checkDevice);
+});
+
+const selectTab = (tabName) => {
+    currentTab.value = tabName;
+    if (isMobile.value) {
+        isMobileMenuOpen.value = false; // Hide menu, show content layout
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
 </script>
 
 <style scoped>
@@ -119,10 +154,14 @@ const years = [2024, 2025, 2026];
 /* MAIN CONTENT */
 .reports-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 
+/* MOBILE NAV BACK */
+.mobile-nav-back { display: none; margin-bottom: 5px; }
+.back-menu-btn { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 16px; background: #f1f5f9; border: none; color: #334155; font-weight: 800; font-size: 0.85rem; width: 100%; cursor: pointer; }
+
 /* FILTER BAR */
 .top-filter-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 5px 20px rgba(0,0,0,0.02); }
 .filter-group label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; }
-.f-controls { display: flex; gap: 10px; }
+.f-controls { display: flex; gap: 10px; flex-wrap: wrap; }
 .f-controls select { height: 40px; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 15px; font-family: inherit; font-size: 0.85rem; font-weight: 700; background: #f8fafc; color: #334155; outline: none; cursor: pointer; }
 
 .info-badge { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: #047857; background: #dcfce7; padding: 6px 12px; border-radius: 20px; }
@@ -138,7 +177,8 @@ const years = [2024, 2025, 2026];
 @media (max-width: 900px) {
   .reports-layout { flex-direction: column; padding: 15px; }
   .reports-sidebar { width: 100%; position: static; }
-  .top-filter-bar { flex-direction: column; align-items: flex-start; gap: 15px; }
+  .mobile-nav-back { display: block; }
+  .top-filter-bar { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
   .info-badge { align-self: flex-start; }
 }
 </style>
