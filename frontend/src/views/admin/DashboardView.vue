@@ -11,8 +11,9 @@
               <p class="location">Gudang Utama, Surabaya</p>
             </div>
           </div>
-          <button class="notif-btn">
+          <button class="notif-btn" @click="$router.push('/admin/orders')">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span v-if="pendingCount > 0" class="notif-badge">{{ pendingCount }}</span>
           </button>
         </header>
 
@@ -87,7 +88,7 @@
             <div v-if="recentOrders.length === 0" style="text-align: center; color: #999; font-size: 0.8rem; padding: 10px 0;">
               Tidak ada pesanan terbaru
             </div>
-            <div v-else v-for="order in recentOrders" :key="order.id" class="order-mini-card">
+            <div v-else v-for="order in recentOrders" :key="order.id" class="order-mini-card" @click="$router.push('/admin/orders')" style="cursor: pointer;">
               <div class="ord-info">
                  <h5>{{ order.customer_name }}</h5>
                  <p>{{ order.invoice_number }}</p>
@@ -129,6 +130,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 import client from '../../api/client';
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -136,6 +139,7 @@ const authStore = useAuthStore();
 const stats = ref({ sales: 0, orders: 0, lowStock: 0 });
 const recentOrders = ref([]);
 const searchQuery = ref('');
+const pendingCount = ref(0);
 
 const handleSearch = () => {
     if (searchQuery.value.trim()) {
@@ -171,7 +175,8 @@ const fetchDashboardData = async () => {
         // Fetch Orders List
         const ordersRes = await client.get('orders');
         if(ordersRes.data?.data) {
-            recentOrders.value = ordersRes.data.data.slice(0, 3); // Take top 3
+            recentOrders.value = ordersRes.data.data.slice(0, 5);
+            pendingCount.value = ordersRes.data.data.filter(o => o.status === 'pending' || o.status === 'paid').length;
         }
         
         // Fetch Stock (To count low stock)
@@ -187,8 +192,10 @@ const fetchDashboardData = async () => {
 const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
 
 const handleLogout = () => {
-  authStore.logout();
-  router.push('/login');
+  toast.ask('Keluar dari sistem admin?', () => {
+    authStore.logout();
+    router.push('/login');
+  }, 'Logout Admin?');
 };
 
 onMounted(fetchDashboardData);
@@ -230,6 +237,34 @@ onMounted(fetchDashboardData);
   border-radius: 12px;
   color: white;
   cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #3b82f6;
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
 }
 
 /* Search Bar overlap */

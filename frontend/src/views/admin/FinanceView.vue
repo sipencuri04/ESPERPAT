@@ -171,6 +171,8 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import client from '../../api/client';
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 import Chart from 'chart.js/auto';
 
 const financeData = ref({});
@@ -313,7 +315,7 @@ const handleExport = async (type) => {
       window.URL.revokeObjectURL(url);
    } catch (err) {
       console.error('Export failed:', err);
-      alert('Gagal mengunduh laporan. Pastikan anda masih login.');
+      toast.error('Gagal mengunduh laporan. Pastikan anda masih login.');
    }
 };
 

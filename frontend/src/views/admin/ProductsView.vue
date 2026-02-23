@@ -262,6 +262,8 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import client from '../../api/client';
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 
@@ -481,17 +483,19 @@ const handleSave = async () => {
     closeModal();
     fetchProducts();
   } catch (err) {
-    alert(err.response?.data?.message || 'Gagal menyimpan.');
+    toast.error(err.response?.data?.message || 'Gagal menyimpan.');
   } finally { submitting.value = false; }
 };
 
 const handleDelete = async (id) => {
-  if (!confirm('Hapus produk ini secara permanen?')) return;
-  try {
-    await client.delete(`products/${id}`);
-    if (isDetailOpen.value) closeDetail();
-    fetchProducts();
-  } catch (err) { alert('Gagal menghapus.'); }
+  toast.ask('Hapus produk ini secara permanen?', async () => {
+    try {
+      await client.delete(`products/${id}`);
+      if (isDetailOpen.value) closeDetail();
+      toast.success('Produk berhasil dihapus.');
+      fetchProducts();
+    } catch (err) { toast.error('Gagal menghapus.'); }
+  }, 'Hapus Produk?');
 };
  
 const openRestock = () => {
@@ -529,7 +533,7 @@ const handleRestockSubmit = async () => {
     isRestockOpen.value = false;
     fetchProducts();
   } catch (err) {
-    alert('Gagal update data.');
+    toast.error('Gagal update data.');
   } finally {
     submitting.value = false;
   }

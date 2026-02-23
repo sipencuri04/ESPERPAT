@@ -103,6 +103,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import client from '../../api/client';
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 
 const users = ref([]);
 const loading = ref(true);
@@ -139,17 +141,18 @@ const closeDrawer = () => { isDrawerOpen.value = false; };
 const handleToggleStatus = async () => {
     const newStatus = selectedUser.value.is_active ? 0 : 1;
     const msg = newStatus ? 'Aktifkan pelanggan ini?' : 'Nonaktifkan pelanggan ini?';
-    if (!confirm(msg)) return;
-
-    try {
-        await client.put(`customers/${selectedUser.value.id}/toggle`, {
-            is_active: newStatus
-        });
-        selectedUser.value.is_active = newStatus;
-        fetchCustomers();
-    } catch (err) {
-        alert('Gagal mengubah status user.');
-    }
+    toast.ask(msg, async () => {
+      try {
+          await client.put(`customers/${selectedUser.value.id}/toggle`, {
+              is_active: newStatus
+          });
+          selectedUser.value.is_active = newStatus;
+          toast.success(newStatus ? 'Pelanggan berhasil diaktifkan.' : 'Pelanggan berhasil dinonaktifkan.');
+          fetchCustomers();
+      } catch (err) {
+          toast.error('Gagal mengubah status user.');
+      }
+    });
 };
 
 const getInitials = (name) => {

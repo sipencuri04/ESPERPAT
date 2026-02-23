@@ -96,6 +96,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import client from '../../api/client';
+import { useToast } from '../../composables/useToast';
+const toast = useToast();
 
 const categories = ref([]);
 const loading = ref(true);
@@ -151,21 +153,23 @@ const handleSave = async () => {
         closeModal();
         fetchCategories();
     } catch (err) {
-        alert(err.response?.data?.message || 'Gagal menyimpan.');
+        toast.error(err.response?.data?.message || 'Gagal menyimpan.');
     } finally {
         submitting.value = false;
     }
 };
 
 const handleDelete = async (id) => {
-    if (!confirm('Hapus kategori ini? Produk di dalamnya mungkin akan kehilangan kategori.')) return;
-    try {
-        await client.delete(`categories/${id}`);
-        isDrawerOpen.value = false;
-        fetchCategories();
-    } catch (err) {
-        alert('Gagal menghapus kategori.');
-    }
+    toast.ask('Hapus kategori ini? Produk di dalamnya mungkin akan kehilangan kategori.', async () => {
+      try {
+          await client.delete(`categories/${id}`);
+          isDrawerOpen.value = false;
+          toast.success('Kategori berhasil dihapus.');
+          fetchCategories();
+      } catch (err) {
+          toast.error('Gagal menghapus kategori.');
+      }
+    }, 'Hapus Kategori?');
 };
 
 onMounted(fetchCategories);

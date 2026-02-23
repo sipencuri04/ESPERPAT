@@ -10,6 +10,14 @@
         <div style="width: 40px"></div>
       </header>
 
+      <!-- Search -->
+      <div class="search-box animate-fade-up">
+        <div class="input-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" placeholder="Cari invoice atau nama customer..." v-model="searchQuery" />
+        </div>
+      </div>
+
       <!-- Stats Row -->
       <div class="order-stats animate-fade-up">
         <div class="stat-card">
@@ -192,6 +200,7 @@ const currentTab = ref('pending');
 const isDetailOpen = ref(false);
 const selectedOrder = ref(null);
 const resiInput = ref('');
+const searchQuery = ref('');
 const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace('/api/', '/');
 
 const tabs = [
@@ -210,8 +219,18 @@ const statistics = computed(() => {
 });
 
 const filteredOrders = computed(() => {
-  if (currentTab.value === 'all') return orders.value;
-  return orders.value.filter(o => o.status === currentTab.value);
+  let list = orders.value;
+  if (currentTab.value !== 'all') {
+    list = list.filter(o => o.status === currentTab.value);
+  }
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase();
+    list = list.filter(o => 
+      (o.invoice_number || '').toLowerCase().includes(q) ||
+      (o.customer_name || '').toLowerCase().includes(q)
+    );
+  }
+  return list;
 });
 
 const fetchOrders = async () => {
@@ -308,6 +327,10 @@ onMounted(fetchOrders);
 .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: #fdfdfd; position: sticky; top: 0; z-index: 10; }
 .top-bar .title { font-weight: 800; font-size: 1.2rem; }
 .back-btn { background: none; border: none; cursor: pointer; }
+
+.search-box { padding: 0 1.5rem; margin-bottom: 15px; }
+.input-wrap { background: #f1f1f1; border-radius: 16px; display: flex; align-items: center; padding: 0 15px; height: 50px; }
+.input-wrap input { flex: 1; border: none; background: transparent; padding-left: 10px; font-family: inherit; outline: none; font-weight: 600; }
 
 /* Stats */
 .order-stats { display: flex; gap: 12px; padding: 0 1.5rem; margin-bottom: 25px; }
