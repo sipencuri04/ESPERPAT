@@ -1,9 +1,9 @@
 <template>
   <div class="admin-reports">
-    <div class="container mobile-frame reports-layout">
+    <div class="container mobile-frame reports-layout" :class="isMobileMenuOpen ? 'mobile-nav-mode' : 'mobile-content-mode'">
       
       <!-- SIDEBAR -->
-      <aside class="reports-sidebar animate-fade-right" v-show="!isMobile || isMobileMenuOpen">
+      <aside class="reports-sidebar animate-fade-right">
         <div class="sidebar-header">
           <button @click="$router.push('/admin')" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -35,9 +35,9 @@
       </aside>
 
       <!-- MAIN CONTENT -->
-      <main class="reports-content" v-show="!isMobile || !isMobileMenuOpen">
+      <main class="reports-content">
         <!-- Back to Menu Button on Mobile -->
-        <div class="mobile-nav-back animate-fade-up" v-if="isMobile && !isMobileMenuOpen">
+        <div class="mobile-nav-back animate-fade-up">
             <button class="back-menu-btn" @click="isMobileMenuOpen = true">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 <span>Kembali ke Menu Pilihan Laporan</span>
@@ -177,8 +177,15 @@ const selectTab = (tabName) => {
 @media (max-width: 900px) {
   .reports-layout { flex-direction: column; padding: 15px; }
   .reports-sidebar { width: 100%; position: static; }
-  .mobile-nav-back { display: block; }
   .top-filter-bar { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
   .info-badge { align-self: flex-start; }
+  
+  /* UX Toggling Mobile Pages */
+  .mobile-nav-mode .reports-sidebar { display: block; }
+  .mobile-nav-mode .reports-content { display: none; }
+  
+  .mobile-content-mode .reports-sidebar { display: none; }
+  .mobile-content-mode .reports-content { display: flex; }
+  .mobile-content-mode .mobile-nav-back { display: block; }
 }
 </style>
