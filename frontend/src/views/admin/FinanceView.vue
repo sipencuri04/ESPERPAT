@@ -53,8 +53,16 @@
       </div>
 
       <template v-else>
-      <!-- Main Balance & Target -->
-      <div class="balance-card-v2 animate-fade-up">
+      
+      <!-- Tabs Navigation -->
+      <div class="finance-tabs animate-fade-up">
+        <button class="tab-btn" :class="{ active: currentTab === 'summary' }" @click="currentTab = 'summary'">Ringkasan</button>
+        <button class="tab-btn" :class="{ active: currentTab === 'details' }" @click="currentTab = 'details'">Riwayat Order</button>
+      </div>
+
+      <div v-show="currentTab === 'summary'">
+        <!-- Main Balance & Target -->
+        <div class="balance-card-v2 animate-fade-up">
         <div class="main-stats">
           <span class="lbl">Total Laba Bersih</span>
           <div class="amount-row">
@@ -127,8 +135,10 @@
             <strong class="val">{{ financeData.orders ? financeData.orders.length : 0 }} Pesanan</strong>
           </div>
         </div>
-      </div>
+        </div>
+      </div> <!-- End Summary Tab -->
 
+      <div v-show="currentTab === 'details'">
       <!-- Detail Transactions with Expandable -->
       <div class="transactions-section animate-fade-up" style="animation-delay: 0.2s">
         <div class="section-header">
@@ -187,7 +197,8 @@
            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
            <p>Belum ada transaksi sukses di periode/status ini</p>
         </div>
-      </div>
+        </div>
+      </div> <!-- End Details Tab -->
 
       </template>
     </div>
@@ -205,9 +216,12 @@ const financeData = ref({});
 const growthData = ref({});
 const dailyData = ref([]);
 const monthlyData = ref([]);
+const dailyData = ref([]);
+const monthlyData = ref([]);
 const loading = ref(true);
 const isFilterOpen = ref(false);
 const expandedRows = ref([]);
+const currentTab = ref('summary');
 
 const filter = ref({
   month: new Date().getMonth() + 1,
@@ -374,6 +388,11 @@ onMounted(fetchAll);
 .btn-export { flex: 1; height: 44px; border-radius: 12px; border: none; font-weight: 800; font-size: 0.8rem; cursor: pointer; }
 .btn-export.pdf { background: #fee2e2; color: #ef4444; }
 .btn-export.excel { background: #dcfce7; color: #22c55e; }
+
+/* Tabs */
+.finance-tabs { display: flex; gap: 10px; padding: 0 1.5rem; margin-bottom: 20px; }
+.tab-btn { flex: 1; height: 44px; border-radius: 14px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #64748b; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.3s; }
+.tab-btn.active { background: #8b5cf6; color: white; border-color: #8b5cf6; box-shadow: 0 5px 15px rgba(139,92,246,0.3); }
 
 /* Balance V2 */
 .balance-card-v2 { 
