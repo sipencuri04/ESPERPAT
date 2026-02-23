@@ -112,7 +112,7 @@ class AdvancedReportController extends BaseApiController
             else $operasional += $e['amount'];
         }
 
-        $saldoAwal = 50000000; // Mocked opening balance for demo
+        $saldoAwal = 0; // Mocked opening balance removed
         $totalMasuk = $kasMasukPenjualan;
         $totalKeluar = $operasional + $aset;
         $saldoAkhir = $saldoAwal + $totalMasuk - $totalKeluar;
@@ -132,7 +132,9 @@ class AdvancedReportController extends BaseApiController
     public function neraca()
     {
         // Simple balance sheet synthesis
-        $kasBank = 75000000; // Calculated or aggregated
+        // Fetch valid past transactions or zero
+        $ordersValue = array_sum(array_column($this->orderModel->where('status', 'completed')->findAll(), 'total'));
+        $kasBank = $ordersValue; 
         
         $piutangData = $this->piutangModel->where('status !=', 'paid')->findAll();
         $piutang = array_sum(array_column($piutangData, 'amount'));
@@ -144,15 +146,15 @@ class AdvancedReportController extends BaseApiController
             $inventoryValue += ($p['stok'] * $p['harga_beli']);
         }
 
-        $asetTetap = 120000000; // Mocked
+        $asetTetap = 0; 
         $totalAset = $kasBank + $piutang + $inventoryValue + $asetTetap;
 
         $hutangData = $this->hutangModel->where('status !=', 'paid')->findAll();
         $hutangSupplier = array_sum(array_column($hutangData, 'amount'));
-        $hutangLain = 15000000; // Mocked
+        $hutangLain = 0; 
 
         $totalHutang = $hutangSupplier + $hutangLain;
-        $modalAwal = 100000000; // Mocked
+        $modalAwal = 0; 
         $labaDitahan = $totalAset - $totalHutang - $modalAwal; // Balancing figure
         $totalModal = $modalAwal + $labaDitahan;
 
